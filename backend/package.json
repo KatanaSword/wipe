@@ -1,0 +1,22 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "disk/index.js",
+  "scripts": {
+    "build": "",
+    "start": "",
+    "dev": "npm run build && npm run start",
+    "test": "jest"
+  },
+  "author": "Saurabh Tajane",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.7",
+    "typescript": "^5.7.2"
+  }
+}
