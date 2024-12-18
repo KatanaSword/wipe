@@ -1,16 +1,40 @@
 import { asyncHandler } from "../utils/asyncHandler";
 import { Request, Response } from "express";
-import { userRegisterSchema } from "../validations/schemas/user.schema";
+import {
+  userRegisterSchema,
+  userSignInSchema,
+} from "../validations/schemas/user.schema";
 import { ApiError } from "../utils/ApiError";
 import { User } from "../models/user.model";
-import { userRoleEnum } from "../constants";
+import { options, userRoleEnum } from "../constants";
 import { ApiResponse } from "../utils/ApiResponse";
+
+const generateAccessAndRefreshToken = async (
+  userId: string
+): Promise<{ accessToken: string; refreshToken: string }> => {
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+    const accessToken: string = user.generateAccessToken();
+    const refreshToken: string = user.generateRefreshToken();
+
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    return { accessToken, refreshToken };
+  } catch (error) {
+    throw new ApiError(
+      500,
+      "Failed to generate access and refresh tokens. Please try again later"
+    );
+  }
+};
 
 const userRegister = asyncHandler(async (req: Request, res: Response) => {
   const parserData = userRegisterSchema.safeParse(req.body);
-  console.log("ParserData:", parserData);
   const errorMessage = parserData.error?.issues.map((issue) => issue.message);
-  console.log("ErrorMessage:", errorMessage);
   if (!parserData.success) {
     throw new ApiError(400, "Field is empty", errorMessage);
   }
@@ -21,7 +45,6 @@ const userRegister = asyncHandler(async (req: Request, res: Response) => {
       { email: parserData.data.email },
     ],
   });
-  console.log("UserExist:", userExist);
   if (userExist) {
     throw new ApiError(
       409,
@@ -35,7 +58,6 @@ const userRegister = asyncHandler(async (req: Request, res: Response) => {
     password: parserData.data.password,
     role: parserData.data.role || userRoleEnum.USER,
   });
-  console.log("User:", user);
   if (!user) {
     throw new ApiError(500, "Failed to create user. Please try again later");
   }
@@ -43,7 +65,6 @@ const userRegister = asyncHandler(async (req: Request, res: Response) => {
   const userCreated = await User.findById(user._id).select(
     "-password -refreshToken"
   );
-  console.log("UserCreated:", userCreated);
   if (!userCreated) {
     throw new ApiError(404, "User not found");
   }
@@ -55,4 +76,51 @@ const userRegister = asyncHandler(async (req: Request, res: Response) => {
     );
 });
 
-export { userRegister };
+const userSignIn = asyncHandler(async (req: Request, res: Response) => {
+  const parserData = userSignInSchema.safeParse(req.body);
+  const errorMessage = parserData.error?.issues.map((issue) => issue.message);
+  if (!parserData.success) {
+    throw new ApiError(400, "Field is empty", errorMessage);
+  }
+
+  const user = await User.findOne({
+    $or: [
+      { username: parserData.data.username },
+      { email: parserData.data.email },
+    ],
+  });
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const isPasswordValid: boolean = await user.isPasswordCorrect(
+    parserData.data.password
+  );
+  if (!isPasswordValid) {
+    throw new ApiError(401, "Password is invalid. Please try again");
+  }
+
+  const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+    user._id
+  );
+  const userSignedIn = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
+  if (!userSignedIn) {
+    throw new ApiError(404, "User not found");
+  }
+
+  res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        { user: userSignedIn, accessToken, refreshToken },
+        "User sign in successfully"
+      )
+    );
+});
+
+export { userRegister, userSignIn };
