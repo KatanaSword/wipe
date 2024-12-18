@@ -20,4 +20,10 @@ const userRegisterSchema = z.object({
   role: z.enum(["USER", "ADMIN"]).default("USER"),
 });
 
-export { userRegisterSchema };
+const userSignInSchema = z.object({
+  username: z.string().optional(),
+  email: z.string().email({ message: "Email invalid" }).optional(),
+  password: z.string(),
+});
+
+export { userRegisterSchema, userSignInSchema };
