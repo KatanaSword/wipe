@@ -1,5 +1,5 @@
 class ApiResponse {
-  public success: boolean;
+  success: boolean;
   constructor(
     public statusCode: number,
     public data: {},
