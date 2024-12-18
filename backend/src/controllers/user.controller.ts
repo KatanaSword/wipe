@@ -123,4 +123,22 @@ const userSignIn = asyncHandler(async (req: Request, res: Response) => {
     );
 });
 
-export { userRegister, userSignIn };
+const userSignOut = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    await User.findByIdAndUpdate(
+      req.user._id,
+      { $unset: { refreshToken: 1 } },
+      { new: true }
+    );
+
+    return res
+      .status(200)
+      .clearCookie("accessToken", options)
+      .clearCookie("refreshToken", options)
+      .json(new ApiResponse(200, {}, "User sign out successfully"));
+  } catch (error) {
+    throw new ApiError(500, "Sign out failed. Please try again later.");
+  }
+});
+
+export { userRegister, userSignIn, userSignOut };
