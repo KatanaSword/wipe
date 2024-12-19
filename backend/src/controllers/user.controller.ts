@@ -141,4 +141,14 @@ const userSignOut = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-export { userRegister, userSignIn, userSignOut };
+const getCurrentUser = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    res
+      .status(200)
+      .json(new ApiResponse(200, req.user, "Fetch a current user"));
+  } catch (error) {
+    throw new ApiError(500, "Failed to fetch user. Please try again later.");
+  }
+});
+
+export { userRegister, userSignIn, userSignOut, getCurrentUser };
