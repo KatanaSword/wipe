@@ -1,6 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler";
 import { Request, Response } from "express";
 import {
+  accountDetailUpdateSchema,
   userRegisterSchema,
   userSignInSchema,
 } from "../validations/schemas/user.schema";
@@ -151,4 +152,39 @@ const getCurrentUser = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-export { userRegister, userSignIn, userSignOut, getCurrentUser };
+const accountDetailUpdate = asyncHandler(
+  async (req: Request, res: Response) => {
+    const parserData = accountDetailUpdateSchema.safeParse(req.body);
+    const errorMessage = parserData.error?.issues.map((issue) => issue.message);
+    if (!parserData.success) {
+      throw new ApiError(400, "", errorMessage);
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $set: {
+          phoneNumber: parserData.data.phoneNumber,
+          countryCode: parserData.data.countryCode,
+          fullName: parserData.data.fullName,
+        },
+      },
+      { new: true }
+    ).select("-password -refreshToken");
+    if (!user) {
+      throw new ApiError(500, "Account update failed, Please try again later.");
+    }
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, user, "Account update successfully"));
+  }
+);
+
+export {
+  userRegister,
+  userSignIn,
+  userSignOut,
+  getCurrentUser,
+  accountDetailUpdate,
+};
