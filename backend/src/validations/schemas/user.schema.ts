@@ -26,4 +26,14 @@ const userSignInSchema = z.object({
   password: z.string(),
 });
 
-export { userRegisterSchema, userSignInSchema };
+const accountDetailUpdateSchema = z.object({
+  phoneNumber: z.number().optional(),
+  countryCode: z
+    .string()
+    .min(2, { message: "Invalid code" })
+    .max(4, { message: "Invaild code" })
+    .optional(),
+  fullName: z.string().trim().optional(),
+});
+
+export { userRegisterSchema, userSignInSchema, accountDetailUpdateSchema };
