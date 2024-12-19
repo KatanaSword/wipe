@@ -9,6 +9,7 @@ import { ApiError } from "../utils/ApiError";
 import { User } from "../models/user.model";
 import { options, userRoleEnum } from "../constants";
 import { ApiResponse } from "../utils/ApiResponse";
+import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshToken = async (
   userId: string
@@ -181,10 +182,92 @@ const accountDetailUpdate = asyncHandler(
   }
 );
 
+const avatarUpdate = asyncHandler(async (req: Request, res: Response) => {
+  const parserData = avatarUpdateSchema.safeParse(req.body);
+  const errorMessage = parserData.error?.issues.map((issue) => issue.message);
+  if (!parserData.success) {
+    throw new ApiError(400, "Field is empty", errorMessage);
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        avatar: {
+          url,
+          publicId,
+        },
+      },
+    },
+    { new: true }
+  ).select("-password -refreshToken");
+  if (!user) {
+    throw new ApiError(500, "Update avatar failed, Please try again later.");
+  }
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, user, "Update avatar successfully"));
+});
+
+const accessRefreshToken = asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const incomingRefreshToken =
+      req.cookies?.refreshToken || req.body?.refreshToken;
+    console.log("IncomingRefreshToken:", incomingRefreshToken);
+    if (!incomingRefreshToken) {
+      throw new ApiError(401, "Missing or invalid refresh token");
+    }
+
+    const decodeToken = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECURE!
+    );
+    console.log("Decode:", decodeToken);
+    if (!decodeToken) {
+      throw new ApiError(401, "Missing or invalid refresh token");
+    }
+
+    const user = await User.findById(decodeToken._id);
+    console.log("User:", user);
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+
+    if (incomingRefreshToken !== user.refreshToken) {
+      throw new ApiError(401, "Missing or invalid refresh token");
+    }
+
+    const { accessToken, refreshToken: newRefreshToken } =
+      await generateAccessAndRefreshToken(user._id);
+    console.log(
+      `accessToken: ${accessToken}\nrefreshToken: ${newRefreshToken}`
+    );
+    res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", newRefreshToken, options)
+      .json(
+        new ApiResponse(
+          200,
+          { accessToken, refreshToken: newRefreshToken },
+          "Access and refresh tokens generated successfully"
+        )
+      );
+  } catch (error) {
+    throw new ApiError(
+      401,
+      "Refresh token mismatch. Please reauthenticate to obtain a new access token"
+    );
+  }
+});
+
 export {
   userRegister,
   userSignIn,
   userSignOut,
   getCurrentUser,
   accountDetailUpdate,
+  avatarUpdate,
+  accessRefreshToken,
 };
