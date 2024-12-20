@@ -4,6 +4,7 @@ import {
   accountDetailUpdate,
   assignRole,
   avatarUpdate,
+  forgotPasswordRequest,
   getCurrentUser,
   userRegister,
   userSignIn,
@@ -11,7 +12,7 @@ import {
 } from "../controllers/user.controller";
 import { verifyJWT, verifyPermission } from "../middlewares/auth.middleware";
 import { upload } from "../middlewares/multer.middleware";
-import { availableUserRole } from "../constants";
+import { userRoleEnum } from "../constants";
 
 const router = Router();
 
@@ -19,6 +20,7 @@ const router = Router();
 router.route("/signup").post(userRegister);
 router.route("/signin").post(userSignIn);
 router.route("/refresh_token").post(accessRefreshToken);
+router.route("/forgot_password").post(forgotPasswordRequest);
 
 // secure router
 router.route("/signout").post(verifyJWT, userSignOut);
@@ -27,6 +29,6 @@ router.route("/account_update").patch(verifyJWT, accountDetailUpdate);
 router.route("/avatar").patch(verifyJWT, upload.single("avatar"), avatarUpdate);
 router
   .route("/assign_role/:userId")
-  .patch(verifyJWT, verifyPermission(availableUserRole), assignRole);
+  .patch(verifyJWT, verifyPermission([userRoleEnum.ADMIN]), assignRole);
 
 export default router;
