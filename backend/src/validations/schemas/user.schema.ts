@@ -36,4 +36,23 @@ const accountDetailUpdateSchema = z.object({
   fullName: z.string().trim().optional(),
 });
 
-export { userRegisterSchema, userSignInSchema, accountDetailUpdateSchema };
+const assignRoleSchema = z.object({
+  role: z.enum(["USER", "ADMIN"]).default("USER"),
+});
+
+const tokenSchema = z.object({
+  userId: z.string(),
+});
+
+const forgotPasswordRequestSchema = z.object({
+  email: z.string().email({ message: "Email invalid" }),
+});
+
+export {
+  userRegisterSchema,
+  userSignInSchema,
+  accountDetailUpdateSchema,
+  assignRoleSchema,
+  tokenSchema,
+  forgotPasswordRequestSchema,
+};
