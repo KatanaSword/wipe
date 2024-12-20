@@ -2,6 +2,8 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { Request, Response } from "express";
 import {
   accountDetailUpdateSchema,
+  assignRoleSchema,
+  tokenSchema,
   userRegisterSchema,
   userSignInSchema,
 } from "../validations/schemas/user.schema";
@@ -214,7 +216,6 @@ const accessRefreshToken = asyncHandler(async (req: Request, res: Response) => {
   try {
     const incomingRefreshToken =
       req.cookies?.refreshToken || req.body?.refreshToken;
-    console.log("IncomingRefreshToken:", incomingRefreshToken);
     if (!incomingRefreshToken) {
       throw new ApiError(401, "Missing or invalid refresh token");
     }
@@ -223,26 +224,21 @@ const accessRefreshToken = asyncHandler(async (req: Request, res: Response) => {
       incomingRefreshToken,
       process.env.REFRESH_TOKEN_SECURE!
     );
-    console.log("Decode:", decodeToken);
     if (!decodeToken) {
       throw new ApiError(401, "Missing or invalid refresh token");
     }
 
     const user = await User.findById(decodeToken._id);
-    console.log("User:", user);
     if (!user) {
       throw new ApiError(404, "User not found");
     }
-
     if (incomingRefreshToken !== user.refreshToken) {
       throw new ApiError(401, "Missing or invalid refresh token");
     }
 
     const { accessToken, refreshToken: newRefreshToken } =
       await generateAccessAndRefreshToken(user._id);
-    console.log(
-      `accessToken: ${accessToken}\nrefreshToken: ${newRefreshToken}`
-    );
+
     res
       .status(200)
       .cookie("accessToken", accessToken, options)
@@ -262,6 +258,24 @@ const accessRefreshToken = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
+const assignRole = asyncHandler(async (req: Request, res: Response) => {
+  const parserData = assignRoleSchema.safeParse(req.body);
+  const parserToken = tokenSchema.safeParse(req.params);
+  if (!parserData.success) {
+    throw new ApiError(400, "Field is empty");
+  }
+
+  const user = await User.findById(parserToken.data?.userId);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  user.role = parserData.data.role;
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json(new ApiResponse(200, {}, "Assign role successfully"));
+});
+
 export {
   userRegister,
   userSignIn,
@@ -270,4 +284,5 @@ export {
   accountDetailUpdate,
   avatarUpdate,
   accessRefreshToken,
+  assignRole,
 };
