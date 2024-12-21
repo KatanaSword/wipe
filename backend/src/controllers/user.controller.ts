@@ -4,6 +4,7 @@ import {
   accountDetailUpdateSchema,
   assignRoleSchema,
   forgotPasswordRequestSchema,
+  resetPasswordSchema,
   tokenSchema,
   userRegisterSchema,
   userSignInSchema,
@@ -14,6 +15,7 @@ import { options, userRoleEnum } from "../constants";
 import { ApiResponse } from "../utils/ApiResponse";
 import jwt from "jsonwebtoken";
 import { forgotPasswordMailgenContentEmail, sendEmail } from "../utils/mail";
+import crypto from "crypto";
 
 const generateAccessAndRefreshToken = async (
   userId: string
@@ -298,7 +300,7 @@ const forgotPasswordRequest = asyncHandler(
     user.forgotPasswordExpiry = tokenExpiry;
     await user.save({ validateBeforeSave: false });
 
-    sendEmail({
+    await sendEmail({
       email: user.email,
       subject: "Reset your password",
       mailgenClient: forgotPasswordMailgenContentEmail(
@@ -318,6 +320,41 @@ const forgotPasswordRequest = asyncHandler(
       );
   }
 );
+
+const resetPassword = asyncHandler(async (req: Request, res: Response) => {
+  const parserData = resetPasswordSchema.safeParse(req.body);
+  const parserToken = tokenSchema.safeParse(req.params);
+  const errorMessage = parserData.error?.issues.map((issue) => issue.message);
+  if (!parserData.success || !parserToken.success) {
+    throw new ApiError(400, "Field is empty", errorMessage);
+  }
+
+  let hashedToken = crypto
+    .createHash("sha256")
+    .update(parserToken.data?.userId)
+    .digest("hex");
+
+  const user = await User.findById({
+    $or: [
+      { forgotPasswordToken: hashedToken },
+      { forgotPasswordExpiry: { $gt: Date.now() } },
+    ],
+  });
+  if (!user) {
+    throw new ApiError(
+      489,
+      "Token mismatch or expire, Please request a new token"
+    );
+  }
+
+  user.forgotPasswordToken = undefined;
+  user.forgotPasswordExpiry = undefined;
+
+  user.password = parserData.data.resetPassword;
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json(new ApiResponse(200, {}, "Reset password successfully"));
+});
 
 export {
   userRegister,
