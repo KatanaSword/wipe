@@ -48,6 +48,18 @@ const forgotPasswordRequestSchema = z.object({
   email: z.string().email({ message: "Email invalid" }),
 });
 
+const resetPasswordSchema = z.object({
+  resetPassword: z
+    .string()
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/,
+      {
+        message:
+          "At least 8 characters long one uppercase one lowercase one number one special character",
+      }
+    ),
+});
+
 export {
   userRegisterSchema,
   userSignInSchema,
@@ -55,4 +67,5 @@ export {
   assignRoleSchema,
   tokenSchema,
   forgotPasswordRequestSchema,
+  resetPasswordSchema,
 };
