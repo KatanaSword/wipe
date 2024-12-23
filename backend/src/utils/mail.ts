@@ -5,7 +5,7 @@ import { IOptions } from "../type";
 const sendEmail = async (options: IOptions) => {
   // Configure mailgen by setting a theme and your product info
   const mailGenerator = new Mailgen({
-    theme: "default",
+    theme: "salted",
     product: {
       // Appears in header & footer of e-mails
       name: "Wipe",
@@ -49,7 +49,7 @@ const sendEmail = async (options: IOptions) => {
 
 const forgotPasswordMailgenContentEmail = (
   username: string,
-  verificationToken: string
+  forgotPasswordRedirectUrl: string
 ) => {
   return {
     body: {
@@ -61,7 +61,7 @@ const forgotPasswordMailgenContentEmail = (
         button: {
           color: "#22BC66", // Optional action button color
           text: "Reset your password",
-          link: verificationToken,
+          link: forgotPasswordRedirectUrl,
         },
       },
       outro:
@@ -70,4 +70,31 @@ const forgotPasswordMailgenContentEmail = (
   };
 };
 
-export { sendEmail, forgotPasswordMailgenContentEmail };
+const verifyEmailMailgenContentEmail = (
+  username: string,
+  verificationToken: string
+) => {
+  return {
+    body: {
+      name: username,
+      intro:
+        "You have received this email because a verify email request for your account was received",
+      action: {
+        instructions: "Click the button to verify your email:",
+        button: {
+          color: "#22BC66", // Optional action button color
+          text: "Verify your email",
+          link: verificationToken,
+        },
+      },
+      outro:
+        "If you did not request a verify email. no further action is required on your part",
+    },
+  };
+};
+
+export {
+  sendEmail,
+  forgotPasswordMailgenContentEmail,
+  verifyEmailMailgenContentEmail,
+};
