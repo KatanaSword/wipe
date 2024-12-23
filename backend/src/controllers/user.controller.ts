@@ -5,16 +5,21 @@ import {
   assignRoleSchema,
   forgotPasswordRequestSchema,
   resetPasswordSchema,
-  tokenSchema,
+  userIdSchema,
   userRegisterSchema,
   userSignInSchema,
+  verificationTokenSchema,
 } from "../validations/schemas/user.schema";
 import { ApiError } from "../utils/ApiError";
 import { User } from "../models/user.model";
 import { options, userRoleEnum } from "../constants";
 import { ApiResponse } from "../utils/ApiResponse";
 import jwt from "jsonwebtoken";
-import { forgotPasswordMailgenContentEmail, sendEmail } from "../utils/mail";
+import {
+  forgotPasswordMailgenContentEmail,
+  sendEmail,
+  verifyEmailMailgenContentEmail,
+} from "../utils/mail";
 import crypto from "crypto";
 
 const generateAccessAndRefreshToken = async (
@@ -264,7 +269,7 @@ const accessRefreshToken = asyncHandler(async (req: Request, res: Response) => {
 
 const assignRole = asyncHandler(async (req: Request, res: Response) => {
   const parserData = assignRoleSchema.safeParse(req.body);
-  const parserToken = tokenSchema.safeParse(req.params);
+  const parserToken = userIdSchema.safeParse(req.params);
   if (!parserData.success) {
     throw new ApiError(400, "Field is empty");
   }
@@ -323,7 +328,7 @@ const forgotPasswordRequest = asyncHandler(
 
 const resetPassword = asyncHandler(async (req: Request, res: Response) => {
   const parserData = resetPasswordSchema.safeParse(req.body);
-  const parserToken = tokenSchema.safeParse(req.params);
+  const parserToken = verificationTokenSchema.safeParse(req.params);
   const errorMessage = parserData.error?.issues.map((issue) => issue.message);
   if (!parserData.success || !parserToken.success) {
     throw new ApiError(400, "Field is empty", errorMessage);
@@ -331,7 +336,7 @@ const resetPassword = asyncHandler(async (req: Request, res: Response) => {
 
   let hashedToken = crypto
     .createHash("sha256")
-    .update(parserToken.data?.userId)
+    .update(parserToken.data?.token)
     .digest("hex");
 
   const user = await User.findById({
@@ -356,6 +361,85 @@ const resetPassword = asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json(new ApiResponse(200, {}, "Reset password successfully"));
 });
 
+const verifyEmailRequest = asyncHandler(async (req: Request, res: Response) => {
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  if (user.isEmailVerify) {
+    throw new ApiError(200, "Email is already verified");
+  }
+
+  const { unHashedToken, hashedToken, tokenExpiry } =
+    user.generateTemporaryToken();
+
+  user.emailVerificationToken = hashedToken;
+  user.emailVerificationExpiry = tokenExpiry;
+  await user.save({ validateBeforeSave: false });
+
+  sendEmail({
+    email: user.email,
+    subject: "Verify your email",
+    mailgenClient: verifyEmailMailgenContentEmail(
+      user.username,
+      `${req.protocol}://${req.get(
+        "host"
+      )}/api/v1/users/verify_email/${unHashedToken}`
+    ),
+  });
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        {},
+        "Email sent on your email Id. Please check your inbox for further instructions"
+      )
+    );
+});
+
+const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
+  const parserToken = verificationTokenSchema.safeParse(req.params);
+  if (!parserToken.success) {
+    throw new ApiError(
+      400,
+      "Invalid or missing user ID. Please provide a valid user ID"
+    );
+  }
+
+  let hashedToken = crypto
+    .createHash("sha256")
+    .update(parserToken.data.token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    $or: [
+      { emailVerificationToken: hashedToken },
+      { emailVerificationExpiry: { $gt: Date.now() } },
+    ],
+  });
+  if (!user) {
+    throw new ApiError(
+      489,
+      "Token mismatch or expire, Please request a new token"
+    );
+  }
+
+  user.emailVerificationToken = undefined;
+  user.emailVerificationExpiry = undefined;
+
+  user.isEmailVerify = true;
+  await user.save({ validateBeforeSave: false });
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, { isEmailVerify: true }, "verify email successfully")
+    );
+});
+
 export {
   userRegister,
   userSignIn,
@@ -366,4 +450,5 @@ export {
   accessRefreshToken,
   assignRole,
   forgotPasswordRequest,
+  resetPassword,
 };
