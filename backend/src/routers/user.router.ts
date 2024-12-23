@@ -4,6 +4,7 @@ import {
   accountDetailUpdate,
   assignRole,
   avatarUpdate,
+  changePassword,
   forgotPasswordRequest,
   getCurrentUser,
   resetPassword,
@@ -36,5 +37,6 @@ router
 router
   .route("/send_email_verification")
   .post(verifyJWT, sendVerifyEmailRequest);
+router.route("/change_password").patch(verifyJWT, changePassword);
 
 export default router;
