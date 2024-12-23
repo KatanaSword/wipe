@@ -6,6 +6,8 @@ import {
   avatarUpdate,
   forgotPasswordRequest,
   getCurrentUser,
+  resetPassword,
+  sendVerifyEmailRequest,
   userRegister,
   userSignIn,
   userSignOut,
@@ -21,6 +23,7 @@ router.route("/signup").post(userRegister);
 router.route("/signin").post(userSignIn);
 router.route("/refresh_token").post(accessRefreshToken);
 router.route("/forgot_password").post(forgotPasswordRequest);
+router.route("/reset_password/:resetToken").post(resetPassword);
 
 // secure router
 router.route("/signout").post(verifyJWT, userSignOut);
@@ -30,5 +33,8 @@ router.route("/avatar").patch(verifyJWT, upload.single("avatar"), avatarUpdate);
 router
   .route("/assign_role/:userId")
   .patch(verifyJWT, verifyPermission([userRoleEnum.ADMIN]), assignRole);
+router
+  .route("/send_email_verification")
+  .post(verifyJWT, sendVerifyEmailRequest);
 
 export default router;
