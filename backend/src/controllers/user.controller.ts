@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import {
   accountDetailUpdateSchema,
   assignRoleSchema,
+  changePasswordSchema,
   forgotPasswordRequestSchema,
   resetPasswordSchema,
   userIdSchema,
@@ -269,12 +270,12 @@ const accessRefreshToken = asyncHandler(async (req: Request, res: Response) => {
 
 const assignRole = asyncHandler(async (req: Request, res: Response) => {
   const parserData = assignRoleSchema.safeParse(req.body);
-  const parserToken = userIdSchema.safeParse(req.params);
+  const parserId = userIdSchema.safeParse(req.params);
   if (!parserData.success) {
     throw new ApiError(400, "Field is empty");
   }
 
-  const user = await User.findById(parserToken.data?.userId);
+  const user = await User.findById(parserId.data?.userId);
   if (!user) {
     throw new ApiError(404, "User not found");
   }
@@ -283,6 +284,33 @@ const assignRole = asyncHandler(async (req: Request, res: Response) => {
   await user.save({ validateBeforeSave: false });
 
   res.status(200).json(new ApiResponse(200, {}, "Assign role successfully"));
+});
+
+const changePassword = asyncHandler(async (req: Request, res: Response) => {
+  const parserData = changePasswordSchema.safeParse(req.body);
+  const errorMessage = parserData.error?.issues.map((issue) => issue.message);
+  if (!parserData.success) {
+    throw new ApiError(400, "Field is empty", errorMessage);
+  }
+
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const isPasswordValid = await user?.isPasswordCorrect(
+    parserData.data.currentPassword
+  );
+  if (!isPasswordValid) {
+    throw new ApiError(400, "Current password is invalid");
+  }
+
+  user.password = parserData.data.newPassword;
+  await user.save({ validateBeforeSave: false });
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password change successfully"));
 });
 
 const forgotPasswordRequest = asyncHandler(
@@ -361,44 +389,46 @@ const resetPassword = asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json(new ApiResponse(200, {}, "Reset password successfully"));
 });
 
-const verifyEmailRequest = asyncHandler(async (req: Request, res: Response) => {
-  const user = await User.findById(req.user._id);
-  if (!user) {
-    throw new ApiError(404, "User not found");
+const sendVerifyEmailRequest = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+
+    if (user.isEmailVerify) {
+      throw new ApiError(200, "Email is already verified");
+    }
+
+    const { unHashedToken, hashedToken, tokenExpiry } =
+      user.generateTemporaryToken();
+
+    user.emailVerificationToken = hashedToken;
+    user.emailVerificationExpiry = tokenExpiry;
+    await user.save({ validateBeforeSave: false });
+
+    sendEmail({
+      email: user.email,
+      subject: "Verify your email",
+      mailgenClient: verifyEmailMailgenContentEmail(
+        user.username,
+        `${req.protocol}://${req.get(
+          "host"
+        )}/api/v1/users/verify_email/${unHashedToken}`
+      ),
+    });
+
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          {},
+          "Email sent on your email Id. Please check your inbox for further instructions"
+        )
+      );
   }
-
-  if (user.isEmailVerify) {
-    throw new ApiError(200, "Email is already verified");
-  }
-
-  const { unHashedToken, hashedToken, tokenExpiry } =
-    user.generateTemporaryToken();
-
-  user.emailVerificationToken = hashedToken;
-  user.emailVerificationExpiry = tokenExpiry;
-  await user.save({ validateBeforeSave: false });
-
-  sendEmail({
-    email: user.email,
-    subject: "Verify your email",
-    mailgenClient: verifyEmailMailgenContentEmail(
-      user.username,
-      `${req.protocol}://${req.get(
-        "host"
-      )}/api/v1/users/verify_email/${unHashedToken}`
-    ),
-  });
-
-  res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        {},
-        "Email sent on your email Id. Please check your inbox for further instructions"
-      )
-    );
-});
+);
 
 const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
   const parserToken = verificationTokenSchema.safeParse(req.params);
@@ -451,4 +481,7 @@ export {
   assignRole,
   forgotPasswordRequest,
   resetPassword,
+  sendVerifyEmailRequest,
+  verifyEmail,
+  changePassword,
 };
