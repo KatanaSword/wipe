@@ -40,8 +40,25 @@ const assignRoleSchema = z.object({
   role: z.enum(["USER", "ADMIN"]).default("USER"),
 });
 
-const tokenSchema = z.object({
+const userIdSchema = z.object({
   userId: z.string(),
+});
+
+const verificationTokenSchema = z.object({
+  token: z.string(),
+});
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string(),
+  newPassword: z
+    .string()
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/,
+      {
+        message:
+          "At least 8 characters long one uppercase one lowercase one number one special character",
+      }
+    ),
 });
 
 const forgotPasswordRequestSchema = z.object({
@@ -65,7 +82,9 @@ export {
   userSignInSchema,
   accountDetailUpdateSchema,
   assignRoleSchema,
-  tokenSchema,
+  userIdSchema,
   forgotPasswordRequestSchema,
   resetPasswordSchema,
+  verificationTokenSchema,
+  changePasswordSchema,
 };
