@@ -1,10 +1,4 @@
-type ImageProps = React.ImgHTMLAttributes<HTMLImageElement> & {
-  className?: string;
-  src: string;
-  alt: string;
-  height?: number | string;
-  width?: number | string;
-};
+import { ImageProps } from "@/type";
 
 const Image: React.FC<ImageProps> = ({
   className,
