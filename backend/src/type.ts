@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 import { Content } from "mailgen";
 
 export interface IUser extends Document {
@@ -6,7 +6,7 @@ export interface IUser extends Document {
   username: string;
   email: string;
   password: string;
-  avatar?: IAvatar;
+  avatar?: IUrl;
   role: string;
   phoneNumber?: number;
   countryCode?: string;
@@ -27,7 +27,16 @@ export interface IUser extends Document {
   };
 }
 
-type IAvatar = {
+export interface IPost extends Document {
+  _id: string;
+  name: string;
+  image?: IUrl;
+  video?: IUrl;
+  content: string;
+  creator: Types.ObjectId;
+}
+
+type IUrl = {
   url: string;
   publicId: string;
 };
