@@ -34,6 +34,14 @@ export interface IPost extends Document {
   video?: IUrl;
   content: string;
   creator: Types.ObjectId;
+  canvasId: Types.ObjectId;
+}
+
+export interface ICanvas extends Document {
+  _id: string;
+  height: number;
+  width: number;
+  color: string;
 }
 
 type IUrl = {
