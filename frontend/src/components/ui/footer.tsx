@@ -1,18 +1,27 @@
 import { FooterProps } from "@/type";
 import { Text } from "./text";
+import { Line } from "./line";
 
-const Footer: React.FC<FooterProps> = ({ className }) => {
+const Footer: React.FC<FooterProps> = ({ className = "bg-black" }) => {
   return (
-    <footer
-      className={`flex flex-col bg-black px-12 py-12 md:px-8 ${className}`}
-    >
-      <div className="flex flex-col gap-4">
-        <div className="flex justify-center">
-          <div className="flex max-w-7xl justify-between sm:flex-col sm:gap-4">
-            <div className="flex w-[40%] flex-col gap-4 sm:w-[100%]">
-              <Text className="text-white">Wipe</Text>
-              <Text className="text-white">
-                Enhance your social media game with Wipe – the ultimate post
+    <>
+      <footer
+        className={`flex w-full items-center justify-center gap-2 px-[75px] py-[50px] md:px-5 ${className}`}
+      >
+        <div className="flex w-full flex-col items-center justify-center gap-[150px] self-center md:gap-10">
+          <div className="flex w-full flex-row items-start justify-between md:flex-col md:gap-10">
+            <div className="flex w-auto flex-col items-start justify-start gap-4">
+              <Text
+                className="w-auto text-[32px] tracking-[-0.50px] text-gray-50 md:text-3xl sm:text-[28px]"
+                size=""
+              >
+                Wipe
+              </Text>
+              <Text
+                className="max-w-[350px] text-base leading-[35.00px] tracking-[-0.50px] text-gray-50 md:max-w-full"
+                size=""
+              >
+                Enhance your social media game with Wipe – the Texttimate post
                 beautifier! ✨🎨 From polished captions to stunning visuals,
                 Wipe helps you create posts that stand out and captivate your
                 audience. Whether you're building your brand or just want to
@@ -21,35 +30,97 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
                 masterpiece! 💫
               </Text>
             </div>
-            <div className="flex flex-shrink justify-between gap-[140px] sm:gap-10">
-              <div>
-                <Text className="text-white">Link</Text>
-                <ul className="text-white">Tools</ul>
-                <ul className="text-white">Pricing</ul>
-                <ul className="text-white">Contact</ul>
-                <ul className="text-white">About</ul>
+            <div className="flex w-[209px] flex-col items-start justify-start gap-5">
+              <Text
+                className="w-auto text-xl tracking-[-0.50px] text-gray-50"
+                size=""
+              >
+                Link
+              </Text>
+              <div className="flex w-auto flex-col items-start justify-start gap-6">
+                <Text
+                  className="w-auto text-sm tracking-[-0.50px] text-gray-50 hover:text-yellow-100"
+                  size=""
+                >
+                  Tools
+                </Text>
+                <Text
+                  className="w-auto text-sm tracking-[-0.50px] text-gray-50 hover:text-yellow-100"
+                  size=""
+                >
+                  Pricing
+                </Text>
+                <Text
+                  className="w-auto text-sm tracking-[-0.50px] text-gray-50 hover:text-yellow-100"
+                  size=""
+                >
+                  Contact
+                </Text>
+                <Text
+                  className="w-auto text-sm tracking-[-0.50px] text-gray-50 hover:text-yellow-100"
+                  size=""
+                >
+                  About
+                </Text>
               </div>
-              <div>
-                <Text className="text-nowrap text-white">Follow us</Text>
-                <ul className="text-white">X</ul>
-                <ul className="text-white">Linkedin</ul>
-                <ul className="text-white">Github</ul>
+            </div>
+            <div className="flex w-[209px] flex-col items-start justify-start gap-5">
+              <Text className="w-auto text-nowrap text-xl tracking-[-0.50px] text-gray-50">
+                Follow us
+              </Text>
+              <div className="flex w-auto flex-col items-start justify-start gap-6">
+                <Text
+                  className="w-auto text-sm tracking-[-0.50px] text-gray-50 hover:text-yellow-100"
+                  size=""
+                >
+                  X
+                </Text>
+                <Text
+                  className="w-auto text-sm tracking-[-0.50px] text-gray-50 hover:text-yellow-100"
+                  size=""
+                >
+                  Linkedin
+                </Text>
+                <Text
+                  className="w-auto text-sm tracking-[-0.50px] text-gray-50 hover:text-yellow-100"
+                  size=""
+                >
+                  Github
+                </Text>
               </div>
-              <div>
-                <Text className="text-white">Legal</Text>
-                <ul className="text-nowrap text-white">Privacy Policy</ul>
-                <ul className="text-nowrap text-white">Terms of Service</ul>
+            </div>
+            <div className="flex w-[209px] flex-col items-start justify-start gap-5">
+              <Text className="w-auto text-xl tracking-[-0.50px] text-gray-50">
+                Legal
+              </Text>
+              <div className="flex w-auto flex-col items-start justify-start gap-6">
+                <Text
+                  className="w-auto text-nowrap text-sm tracking-[-0.50px] text-gray-50 hover:text-yellow-100"
+                  size=""
+                >
+                  Privacy Policy
+                </Text>
+                <Text
+                  className="w-auto text-nowrap text-sm tracking-[-0.50px] text-gray-50 hover:text-yellow-100"
+                  size=""
+                >
+                  Terms of Service
+                </Text>
               </div>
             </div>
           </div>
+          <Line />
+          <div className="flex w-full flex-row items-start justify-start md:gap-10 sm:flex-col">
+            <Text
+              className="w-auto text-nowrap text-base tracking-[-0.50px] text-gray-50"
+              size=""
+            >
+              © 2024 Wipe™. All Rights Reserved.
+            </Text>
+          </div>
         </div>
-        <div>
-          <Text className="text-white">
-            © 2024 Wipe™. All Rights Reserved.
-          </Text>
-        </div>
-      </div>
-    </footer>
+      </footer>
+    </>
   );
 };
 
