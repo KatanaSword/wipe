@@ -3,26 +3,51 @@ import { IPost } from "../type";
 
 const postSchema: Schema<IPost> = new Schema(
   {
-    name: {
-      type: String,
-      default: "untitled name",
+    screenshorts: {
+      type: [
+        {
+          screenshortId: {
+            type: Schema.Types.ObjectId,
+            ref: "Screenshort",
+          },
+        },
+      ],
+      default: [],
     },
-    image: {
-      type: {
-        url: String,
-        publicId: String,
-      },
+    blogs: {
+      type: [
+        {
+          blogId: {
+            type: Schema.Types.ObjectId,
+            ref: "Blog",
+          },
+        },
+      ],
+      default: [],
     },
-    video: {
-      type: {
-        url: String,
-        publicId: String,
-      },
+    codes: {
+      type: [
+        {
+          codeId: {
+            type: Schema.Types.ObjectId,
+            ref: "Code",
+          },
+        },
+      ],
+      default: [],
     },
-    content: {
-      type: String,
+    testimonials: {
+      type: [
+        {
+          testimonialId: {
+            type: Schema.Types.ObjectId,
+            ref: "Testimonial",
+          },
+        },
+      ],
+      default: [],
     },
-    creator: {
+    owner: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
