@@ -6,7 +6,7 @@ export interface IUser extends Document {
   username: string;
   email: string;
   password: string;
-  avatar?: IUrl;
+  avatar?: Url;
   role: string;
   phoneNumber?: number;
   countryCode?: string;
@@ -27,12 +27,40 @@ export interface IUser extends Document {
   };
 }
 
-export interface IPost extends Document {
+export interface IScreenshort extends Document {
   _id: string;
+  fileName: string;
+  image: Url;
+  creator: Types.ObjectId;
+  canvasId: Types.ObjectId;
+}
+
+export interface IBlog extends Document {
+  _id: string;
+  fileName: string;
+  summary: string;
+  image: Url;
+  creator: Types.ObjectId;
+  canvasId: Types.ObjectId;
+}
+
+export interface ICode extends Document {
+  _id: string;
+  fileName: string;
+  codeFileName: string;
+  code: string;
+  language: string;
+  creator: Types.ObjectId;
+  canvasId: Types.ObjectId;
+}
+
+export interface ITestimonial extends Document {
+  _id: string;
+  fileName: string;
+  avatar: Url;
   name: string;
-  image?: IUrl;
-  video?: IUrl;
-  content: string;
+  stars: number;
+  review: string;
   creator: Types.ObjectId;
   canvasId: Types.ObjectId;
 }
@@ -44,7 +72,32 @@ export interface ICanvas extends Document {
   color: string;
 }
 
-type IUrl = {
+export interface IPost extends Document {
+  _id: string;
+  screenshorts: [
+    {
+      screenshortId: Types.ObjectId;
+    }
+  ];
+  blogs: [
+    {
+      blogId: Types.ObjectId;
+    }
+  ];
+  codes: [
+    {
+      codeId: Types.ObjectId;
+    }
+  ];
+  testimonials: [
+    {
+      testimonialId: Types.ObjectId;
+    }
+  ];
+  owner: Types.ObjectId;
+}
+
+type Url = {
   url: string;
   publicId: string;
 };
