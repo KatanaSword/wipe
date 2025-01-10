@@ -27,12 +27,13 @@ export interface IUser extends Document {
   };
 }
 
-export interface IScreenshort extends Document {
+export interface IScreenshot extends Document {
   _id: string;
   fileName: string;
   image: Url;
-  creator: Types.ObjectId;
-  canvasId: Types.ObjectId;
+  owner: Types.ObjectId;
+  aspectRatioId: Types.ObjectId;
+  backgroundColorId: Types.ObjectId;
 }
 
 export interface IBlog extends Document {
@@ -40,8 +41,9 @@ export interface IBlog extends Document {
   fileName: string;
   summary: string;
   image: Url;
-  creator: Types.ObjectId;
-  canvasId: Types.ObjectId;
+  owner: Types.ObjectId;
+  aspectRatioId: Types.ObjectId;
+  backgroundColorId: Types.ObjectId;
 }
 
 export interface ICode extends Document {
@@ -50,8 +52,9 @@ export interface ICode extends Document {
   codeFileName: string;
   code: string;
   language: string;
-  creator: Types.ObjectId;
-  canvasId: Types.ObjectId;
+  owner: Types.ObjectId;
+  aspectRatioId: Types.ObjectId;
+  backgroundColorId: Types.ObjectId;
 }
 
 export interface ITestimonial extends Document {
@@ -61,22 +64,33 @@ export interface ITestimonial extends Document {
   name: string;
   stars: number;
   review: string;
-  creator: Types.ObjectId;
-  canvasId: Types.ObjectId;
+  owner: Types.ObjectId;
+  aspectRatioId: Types.ObjectId;
+  backgroundColorId: Types.ObjectId;
 }
 
-export interface ICanvas extends Document {
+export interface IAspectRatio extends Document {
   _id: string;
   height: number;
   width: number;
-  color: string;
+  ownerId: Types.ObjectId;
+}
+
+export interface IBackgroundColor extends Document {
+  _id: string;
+  backgroundColorName: string;
+  colorHexCode: {
+    colorOne: string;
+    colorTwo: string;
+  };
+  ownerId: Types.ObjectId;
 }
 
 export interface IPost extends Document {
   _id: string;
-  screenshorts: [
+  screenshots: [
     {
-      screenshortId: Types.ObjectId;
+      screenshotId: Types.ObjectId;
     }
   ];
   blogs: [
@@ -94,7 +108,7 @@ export interface IPost extends Document {
       testimonialId: Types.ObjectId;
     }
   ];
-  owner: Types.ObjectId;
+  ownerId: Types.ObjectId;
 }
 
 type Url = {
