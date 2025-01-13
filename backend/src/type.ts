@@ -1,5 +1,8 @@
 import { Document, Types } from "mongoose";
 import { Content } from "mailgen";
+export interface JwtPayload {
+  _id: string;
+}
 
 export interface IUser extends Document {
   _id: string;
@@ -71,6 +74,7 @@ export interface ITestimonial extends Document {
 
 export interface IAspectRatio extends Document {
   _id: string;
+  aspectRatioName: string;
   height: number;
   width: number;
   ownerId: Types.ObjectId;
@@ -121,3 +125,11 @@ export type IOptions = {
   subject: string;
   mailgenClient: Content;
 };
+
+declare global {
+  namespace Express {
+    interface Request {
+      user: IUser;
+    }
+  }
+}
