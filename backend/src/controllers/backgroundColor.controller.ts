@@ -33,10 +33,8 @@ const createBackgroundColor = asyncHandler(
 
     const createBackgroundColor = await BackgroundColor.create({
       backgroundColorName: parserData.data.backgroundColorName,
-      colorHexCode: {
-        colorOne: parserData.data.colorOne,
-        colorTwo: parserData.data.colorTwo,
-      },
+      colorOneHexCode: parserData.data.colorOneHexCode,
+      colorTwoHexCode: parserData.data.colorTwoHexCode,
       ownerId: req.user._id,
     });
     if (!createBackgroundColor) {
@@ -59,25 +57,52 @@ const createBackgroundColor = asyncHandler(
 );
 
 const getBackgroundColorById = asyncHandler(
-  async (req: Request, res: Response) => {}
+  async (req: Request, res: Response) => {
+    const parserId = backgroundColorIdSchema.safeParse(req.params);
+    if (!parserId.success) {
+      throw new ApiError(
+        400,
+        "The background color id field is missing or invalid"
+      );
+    }
+
+    const backgroundColor = await BackgroundColor.findById(
+      parserId.data.backgroundColorId
+    );
+    if (!backgroundColor) {
+      throw new ApiError(404, "Background color is not found");
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          backgroundColor,
+          "Fetch background color successfully"
+        )
+      );
+  }
 );
 
 const updateBackgroundColor = asyncHandler(
   async (req: Request, res: Response) => {
     const parserData = updateBackgroundColorSchema.safeParse(req.body);
-    console.log("ParserData:", parserData);
     const parserId = backgroundColorIdSchema.safeParse(req.params);
-    console.log("ParserId:", parserId);
     const errorMessage = parserData.error?.issues.map((issue) => issue.message);
-    console.log("ErrorMessage:", errorMessage);
-    if (!parserData.success || !parserId.success) {
+    if (!parserData.success) {
       throw new ApiError(400, "", errorMessage);
+    }
+    if (!parserId.success) {
+      throw new ApiError(
+        400,
+        "The background color id field is missing or invalid"
+      );
     }
 
     const backgroundColorNameExist = await BackgroundColor.findOne({
       backgroundColorName: parserData.data.backgroundColorName,
     });
-    console.log("BackgroundColorNameExist:", backgroundColorNameExist);
     if (backgroundColorNameExist) {
       throw new ApiError(
         409,
@@ -90,15 +115,12 @@ const updateBackgroundColor = asyncHandler(
       {
         $set: {
           backgroundColorName: parserData.data.backgroundColorName,
-          colorHexCode: {
-            colorOne: parserData.data.colorOne,
-            colorTwo: parserData.data.colorTwo,
-          },
+          colorOneHexCode: parserData.data.colorOneHexCode,
+          colorTwoHexCode: parserData.data.colorTwoHexCode,
         },
       },
       { new: true }
     );
-    console.log("UpdateBackgroundColor:", updateBackgroundColor);
     if (!updateBackgroundColor) {
       throw new ApiError(
         500,
