@@ -9,8 +9,25 @@ import { ApiError } from "../utils/ApiError";
 import { BackgroundColor } from "../models/backgroundColor.model";
 import { ApiResponse } from "../utils/ApiResponse";
 
-const getAllBackgroundColor = asyncHandler(
-  async (req: Request, res: Response) => {}
+const getAllBackgroundColors = asyncHandler(
+  async (req: Request, res: Response) => {
+    const backgroundColorAggregate = await BackgroundColor.aggregate([
+      { $match: {} },
+    ]);
+    if (backgroundColorAggregate.length < 1) {
+      throw new ApiError(404, "Background color not found");
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          backgroundColorAggregate,
+          "Background color fetch successfully"
+        )
+      );
+  }
 );
 
 const createBackgroundColor = asyncHandler(
@@ -140,19 +157,36 @@ const updateBackgroundColor = asyncHandler(
   }
 );
 
-const removeBackgroundColorImage = asyncHandler(
-  async (req: Request, res: Response) => {}
-);
-
 const deleteBackgroundColor = asyncHandler(
-  async (req: Request, res: Response) => {}
+  async (req: Request, res: Response) => {
+    const parserId = backgroundColorIdSchema.safeParse(req.params);
+    if (!parserId.success) {
+      throw new ApiError(
+        400,
+        "The background color id field is missing or invalid"
+      );
+    }
+
+    const backgroundColor = await BackgroundColor.findByIdAndDelete(
+      parserId.data.backgroundColorId
+    );
+    if (!backgroundColor) {
+      throw new ApiError(
+        500,
+        "Delete background color failed. Please try again later"
+      );
+    }
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, "Background color delete successfully"));
+  }
 );
 
 export {
-  getAllBackgroundColor,
+  getAllBackgroundColors,
   createBackgroundColor,
   getBackgroundColorById,
   updateBackgroundColor,
-  removeBackgroundColorImage,
   deleteBackgroundColor,
 };
