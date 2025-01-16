@@ -18,8 +18,12 @@ app.use(cookieParser());
 
 // import routes
 import userRouter from "./routers/user.router";
+import backgroundColorRouter from "./routers/backgroundColor.router";
+import aspectRatioRouter from "./routers/aspectRatio.router";
 
 // declear routes
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/background_colors", backgroundColorRouter);
+app.use("/api/v1/aspect_ratios", aspectRatioRouter);
 
 export default app;
