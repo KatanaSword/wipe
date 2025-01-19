@@ -1,6 +1,9 @@
 import { asyncHandler } from "../utils/asyncHandler";
 import { Request, Response } from "express";
-import { createBlogSchema } from "../validations/schemas/blog.schema";
+import {
+  blogIdSchema,
+  createBlogSchema,
+} from "../validations/schemas/blog.schema";
 import { ApiError } from "../utils/ApiError";
 import { Blog } from "../models/blog.model";
 import {
@@ -80,3 +83,21 @@ const createBlog = asyncHandler(async (req: Request, res: Response) => {
     .status(201)
     .json(new ApiResponse(201, blog, "Blog post create successfully"));
 });
+
+const getBlogById = asyncHandler(async (req: Request, res: Response) => {
+  const parserId = blogIdSchema.safeParse(req.params);
+  if (!parserId.success) {
+    throw new ApiError(400, "The blog id field is missing or invalid");
+  }
+
+  const blog = await Blog.findById(parserId.data.blogId);
+  if (!blog) {
+    throw new ApiError(404, "Blog is not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, blog, "Blog fetch successfully"));
+});
+
+export { createBlog };
