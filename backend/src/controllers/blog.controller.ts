@@ -18,6 +18,17 @@ import { AspectRatio } from "../models/aspectRatio.model";
 import { BackgroundColor } from "../models/backgroundColor.model";
 import { ApiResponse } from "../utils/ApiResponse";
 
+const getAllBlogs = asyncHandler(async (req: Request, res: Response) => {
+  const blogAggregate = await Blog.aggregate([{ $match: {} }]);
+  if (blogAggregate.length < 1) {
+    throw new ApiError(404, "Blogs not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, blogAggregate, "Blogs fetch successfully"));
+});
+
 const createBlog = asyncHandler(async (req: Request, res: Response) => {
   const parserData = createBlogSchema.safeParse(req.body);
   const parserFileName = fileNameSchema.safeParse(req.body);
@@ -131,4 +142,4 @@ const updateBlog = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse(200, blog, "Update blog successfully"));
 });
 
-export { createBlog, getBlogById };
+export { getAllBlogs, createBlog, getBlogById, updateBlog };
