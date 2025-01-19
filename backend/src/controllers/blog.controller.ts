@@ -142,7 +142,7 @@ const updateBlog = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse(200, blog, "Update blog successfully"));
 });
 
-const updateFileName = asyncHandler(async (req: Request, res: Response) => {
+const updateBlogFileName = asyncHandler(async (req: Request, res: Response) => {
   const parserData = fileNameSchema.safeParse(req.body);
   const parserId = blogIdSchema.safeParse(req.params);
   const errorMessage = parserData.error?.issues.map((issue) => issue.message);
@@ -176,13 +176,40 @@ const updateFileName = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse(200, fileName, "File name update successfully"));
 });
 
-const updateImage = asyncHandler(async (req: Request, res: Response) => {
-  const;
+const updateBlogImage = asyncHandler(async (req: Request, res: Response) => {
+  const imageLocalPath = imageSchema.safeParse(req.file?.path);
+  const parserId = blogIdSchema.safeParse(req.body);
+  if (!imageLocalPath.success) {
+    throw new ApiError(400, "Image path is missing");
+  }
+  if (!parserId.success) {
+    throw new ApiError(400, "The blog id field is missing or invalid");
+  }
+
+  const uploadImage = await uploadFileToS3(imageLocalPath, "", "");
+  if (!uploadImage) {
+    throw new ApiError(400, "");
+  }
+
+  const blog = await Blog.findByIdAndUpdate(
+    parserId.data.blogId,
+    {
+      $set: { image: uploadImage },
+    },
+    { new: true }
+  );
+  if (!blog) {
+    throw new ApiError(500, "Image update failed, Please try again later");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, blog, "Update image successfully"));
 });
 
-const updateAspectRatio;
+const updateBlogAspectRatio;
 
-const updateBackgroundColor;
+const updateBlogBackgroundColor;
 
 const deleteBlog;
 
@@ -191,9 +218,9 @@ export {
   createBlog,
   getBlogById,
   updateBlog,
-  updateFileName,
-  updateImage,
-  updateAspectRatio,
-  updateBackgroundColor,
+  updateBlogFileName,
+  updateBlogImage,
+  updateBlogAspectRatio,
+  updateBlogBackgroundColor,
   deleteBlog,
 };
