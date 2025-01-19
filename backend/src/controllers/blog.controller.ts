@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import {
   blogIdSchema,
   createBlogSchema,
+  updateBlogSchema,
 } from "../validations/schemas/blog.schema";
 import { ApiError } from "../utils/ApiError";
 import { Blog } from "../models/blog.model";
@@ -100,4 +101,34 @@ const getBlogById = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse(200, blog, "Blog fetch successfully"));
 });
 
-export { createBlog };
+const updateBlog = asyncHandler(async (req: Request, res: Response) => {
+  const parserData = updateBlogSchema.safeParse(req.body);
+  const parserId = blogIdSchema.safeParse(req.params);
+  const errorMessage = parserData.error?.issues.map((issue) => issue.message);
+  if (!parserData.success) {
+    throw new ApiError(400, "Field is empty", errorMessage);
+  }
+  if (!parserId.success) {
+    throw new ApiError(400, "The blog id field is missing or invalid");
+  }
+
+  const blog = await Blog.findByIdAndUpdate(
+    parserId.data.blogId,
+    {
+      $set: {
+        title: parserData.data.title,
+        summary: parserData.data.summary,
+      },
+    },
+    { new: true }
+  );
+  if (!blog) {
+    throw new ApiError(500, "Blog update failed, Please try again later");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, blog, "Update blog successfully"));
+});
+
+export { createBlog, getBlogById };
