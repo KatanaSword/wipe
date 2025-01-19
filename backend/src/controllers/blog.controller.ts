@@ -50,9 +50,9 @@ const createBlog = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const fileNameExist = await Blog.findOne({
-    fileName: parserData.data.fileName,
+    fileName: parserFileName.data.fileName,
   });
-  if (!fileNameExist) {
+  if (fileNameExist) {
     throw new ApiError(409, "File name already exist, try another other name");
   }
 
@@ -142,4 +142,58 @@ const updateBlog = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse(200, blog, "Update blog successfully"));
 });
 
-export { getAllBlogs, createBlog, getBlogById, updateBlog };
+const updateFileName = asyncHandler(async (req: Request, res: Response) => {
+  const parserData = fileNameSchema.safeParse(req.body);
+  const parserId = blogIdSchema.safeParse(req.params);
+  const errorMessage = parserData.error?.issues.map((issue) => issue.message);
+  if (!parserData.success) {
+    throw new ApiError(400, "Field is empty", errorMessage);
+  }
+  if (!parserId.success) {
+    throw new ApiError(400, "The blog id field is missing or invalid");
+  }
+
+  const fileNameExist = await Blog.findOne({
+    fileName: parserData.data.fileName,
+  });
+  if (fileNameExist) {
+    throw new ApiError(409, "File name already exist, try other name");
+  }
+
+  const fileName = await Blog.findByIdAndUpdate(
+    parserId.data.blogId,
+    {
+      $set: { fileName: parserData.data.fileName },
+    },
+    { new: true }
+  );
+  if (!fileName) {
+    throw new ApiError(500, "File name update failed, Please try again later");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, fileName, "File name update successfully"));
+});
+
+const updateImage = asyncHandler(async (req: Request, res: Response) => {
+  const;
+});
+
+const updateAspectRatio;
+
+const updateBackgroundColor;
+
+const deleteBlog;
+
+export {
+  getAllBlogs,
+  createBlog,
+  getBlogById,
+  updateBlog,
+  updateFileName,
+  updateImage,
+  updateAspectRatio,
+  updateBackgroundColor,
+  deleteBlog,
+};
