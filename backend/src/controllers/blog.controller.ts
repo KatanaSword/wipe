@@ -276,7 +276,21 @@ const updateBlogBackgroundColor = asyncHandler(
   }
 );
 
-const deleteBlog;
+const deleteBlog = asyncHandler(async (req: Request, res: Response) => {
+  const parserId = blogIdSchema.safeParse(req.params);
+  if (!parserId.success) {
+    throw new ApiError(400, "The blog id field is missing or invalid");
+  }
+
+  const blog = await Blog.findByIdAndDelete(parserId.data.blogId);
+  if (!blog) {
+    throw new ApiError(500, "Failed to delete blog. Please try again later");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Delete blog successfully"));
+});
 
 export {
   getAllBlogs,
