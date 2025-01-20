@@ -238,7 +238,43 @@ const updateBlogAspectRatio = asyncHandler(
   }
 );
 
-const updateBlogBackgroundColor;
+const updateBlogBackgroundColor = asyncHandler(
+  async (req: Request, res: Response) => {
+    const parserData = backgroundColorSchema.safeParse(req.body);
+    const parserId = blogIdSchema.safeParse(req.params);
+    if (!parserData.success) {
+      throw new ApiError(400, "Field is empty");
+    }
+    if (!parserId.success) {
+      throw new ApiError(400, "The blog id field is missing or invalid");
+    }
+
+    const backgroundColorToBeAdded = await BackgroundColor.findOne({
+      backgroundColorName: parserData.data.backgroundColorName,
+    });
+    if (!backgroundColorToBeAdded) {
+      throw new ApiError(404, "Background color not found");
+    }
+
+    const blog = await Blog.findByIdAndUpdate(
+      parserId.data.blogId,
+      {
+        $set: { backgroundColorId: backgroundColorToBeAdded._id },
+      },
+      { new: true }
+    );
+    if (!blog) {
+      throw new ApiError(
+        500,
+        "Failed to update background color. Please try again later"
+      );
+    }
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, blog, "Update background color successfully"));
+  }
+);
 
 const deleteBlog;
 
