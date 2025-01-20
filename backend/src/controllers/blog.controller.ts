@@ -32,16 +32,9 @@ const getAllBlogs = asyncHandler(async (req: Request, res: Response) => {
 const createBlog = asyncHandler(async (req: Request, res: Response) => {
   const parserData = createBlogSchema.safeParse(req.body);
   const parserFileName = fileNameSchema.safeParse(req.body);
-  const parserAspectRatio = aspectRatioSchema.safeParse(req.body);
-  const parserBackgroundColor = backgroundColorSchema.safeParse(req.body);
   const imageLocalPath = imageSchema.safeParse(req.file?.path);
   const errorMessage = parserData.error?.issues.map((issue) => issue.message);
-  if (
-    !parserData.success ||
-    !parserAspectRatio.success ||
-    !parserBackgroundColor.success ||
-    !parserFileName.success
-  ) {
+  if (!parserData.success || !parserFileName.success) {
     throw new ApiError(400, "Field is empty", errorMessage);
   }
 
@@ -57,14 +50,14 @@ const createBlog = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const aspectRatioToBeAdded = await AspectRatio.findOne({
-    aspectRatioName: parserAspectRatio.data.aspectRatio,
+    aspectRatioName: parserData.data.aspectRatioName,
   });
   if (!aspectRatioToBeAdded) {
     throw new ApiError(404, "Aspect ratio not found");
   }
 
   const backgroundColorToBeAdded = await BackgroundColor.findOne({
-    backgroundColorName: parserBackgroundColor.data.backgroundColor,
+    backgroundColorName: parserData.data.backgroundColorName,
   });
   if (!backgroundColorToBeAdded) {
     throw new ApiError(404, "Background color not found");
@@ -207,7 +200,43 @@ const updateBlogImage = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse(200, blog, "Update image successfully"));
 });
 
-const updateBlogAspectRatio;
+const updateBlogAspectRatio = asyncHandler(
+  async (req: Request, res: Response) => {
+    const parserData = aspectRatioSchema.safeParse(req.body);
+    const parserId = blogIdSchema.safeParse(req.params);
+    if (!parserData.success) {
+      throw new ApiError(400, "Field is empty");
+    }
+    if (!parserId.success) {
+      throw new ApiError(400, "The blog id field is missing or invalid");
+    }
+
+    const aspectRatioToBeAdded = await AspectRatio.findOne({
+      aspectRatioName: parserData.data.aspectRatioName,
+    });
+    if (!aspectRatioToBeAdded) {
+      throw new ApiError(404, "Aspect ratio not found");
+    }
+
+    const blog = await Blog.findByIdAndUpdate(
+      parserId.data.blogId,
+      {
+        $set: { aspectRatioId: aspectRatioToBeAdded._id },
+      },
+      { new: true }
+    );
+    if (!blog) {
+      throw new ApiError(
+        500,
+        "Failed to update aspect ratio. Please try again later"
+      );
+    }
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, blog, "Update aspect ratio successfully"));
+  }
+);
 
 const updateBlogBackgroundColor;
 
