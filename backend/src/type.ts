@@ -1,5 +1,6 @@
 import { Document, Types } from "mongoose";
 import { Content } from "mailgen";
+
 export interface JwtPayload {
   _id: string;
 }
@@ -42,6 +43,7 @@ export interface IScreenshot extends Document {
 export interface IBlog extends Document {
   _id: string;
   fileName: string;
+  title: string;
   summary: string;
   image: Url;
   owner: Types.ObjectId;
@@ -63,10 +65,10 @@ export interface ICode extends Document {
 export interface ITestimonial extends Document {
   _id: string;
   fileName: string;
-  avatar: Url;
-  name: string;
+  image: Url;
+  fullName: string;
   stars: number;
-  review: string;
+  testimonial: string;
   owner: Types.ObjectId;
   aspectRatioId: Types.ObjectId;
   backgroundColorId: Types.ObjectId;
@@ -83,10 +85,8 @@ export interface IAspectRatio extends Document {
 export interface IBackgroundColor extends Document {
   _id: string;
   backgroundColorName: string;
-  colorHexCode: {
-    colorOne: string;
-    colorTwo: string;
-  };
+  colorOneHexCode: string;
+  colorTwoHexCode: string;
   ownerId: Types.ObjectId;
 }
 
