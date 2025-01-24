@@ -38,10 +38,14 @@ const createBackgroundColor = asyncHandler(
       throw new ApiError(400, "Field is empty", errorMessage);
     }
 
-    const backgroundColorNameExist = await BackgroundColor.findOne({
-      backgroundColorName: parserData.data.backgroundColorName,
+    const backgroundColorExist = await BackgroundColor.findOne({
+      $or: [
+        { backgroundColorName: parserData.data.backgroundColorName },
+        { colorOneHexCode: parserData.data.colorOneHexCode },
+        { colorTwoHexCode: parserData.data.colorTwoHexCode },
+      ],
     });
-    if (backgroundColorNameExist) {
+    if (backgroundColorExist) {
       throw new ApiError(
         409,
         "Background color already exist, use another name"
@@ -127,7 +131,7 @@ const updateBackgroundColor = asyncHandler(
       );
     }
 
-    const updateBackgroundColor = await BackgroundColor.findByIdAndUpdate(
+    const backgroundColor = await BackgroundColor.findByIdAndUpdate(
       parserId.data.backgroundColorId,
       {
         $set: {
@@ -138,7 +142,7 @@ const updateBackgroundColor = asyncHandler(
       },
       { new: true }
     );
-    if (!updateBackgroundColor) {
+    if (!backgroundColor) {
       throw new ApiError(
         500,
         "Background color update failed, Please try again later"
@@ -150,7 +154,7 @@ const updateBackgroundColor = asyncHandler(
       .json(
         new ApiResponse(
           200,
-          updateBackgroundColor,
+          backgroundColor,
           "Background color update successfully"
         )
       );
@@ -173,7 +177,7 @@ const deleteBackgroundColor = asyncHandler(
     if (!backgroundColor) {
       throw new ApiError(
         500,
-        "Delete background color failed. Please try again later"
+        "Background color delete failed. Please try again later"
       );
     }
 
