@@ -1,5 +1,6 @@
 import { asyncHandler } from "../utils/asyncHandler";
 import { Request, Response } from "express";
+import { JwtPayload } from "../type";
 import {
   accountDetailUpdateSchema,
   assignRoleSchema,
@@ -124,7 +125,7 @@ const userSignIn = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(404, "User not found");
   }
 
-  res
+  return res
     .status(200)
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
@@ -151,13 +152,13 @@ const userSignOut = asyncHandler(async (req: Request, res: Response) => {
       .clearCookie("refreshToken", options)
       .json(new ApiResponse(200, {}, "User sign out successfully"));
   } catch (error) {
-    throw new ApiError(500, "Sign out failed. Please try again later.");
+    throw new ApiError(500, "Sign out failed. Please try again later");
   }
 });
 
 const getCurrentUser = asyncHandler(async (req: Request, res: Response) => {
   try {
-    res
+    return res
       .status(200)
       .json(new ApiResponse(200, req.user, "Fetch a current user"));
   } catch (error) {
@@ -188,13 +189,13 @@ const accountDetailUpdate = asyncHandler(
       throw new ApiError(500, "Account update failed, Please try again later.");
     }
 
-    res
+    return res
       .status(200)
       .json(new ApiResponse(200, user, "Account update successfully"));
   }
 );
 
-const avatarUpdate = asyncHandler(async (req: Request, res: Response) => {
+/*const avatarUpdate = asyncHandler(async (req: Request, res: Response) => {
   const parserData = avatarUpdateSchema.safeParse(req.body);
   const errorMessage = parserData.error?.issues.map((issue) => issue.message);
   if (!parserData.success) {
@@ -220,7 +221,7 @@ const avatarUpdate = asyncHandler(async (req: Request, res: Response) => {
   res
     .status(200)
     .json(new ApiResponse(200, user, "Update avatar successfully"));
-});
+});*/
 
 const accessRefreshToken = asyncHandler(async (req: Request, res: Response) => {
   try {
@@ -233,7 +234,7 @@ const accessRefreshToken = asyncHandler(async (req: Request, res: Response) => {
     const decodeToken = jwt.verify(
       incomingRefreshToken,
       process.env.REFRESH_TOKEN_SECURE!
-    );
+    ) as JwtPayload;
     if (!decodeToken) {
       throw new ApiError(401, "Missing or invalid refresh token");
     }
@@ -249,7 +250,7 @@ const accessRefreshToken = asyncHandler(async (req: Request, res: Response) => {
     const { accessToken, refreshToken: newRefreshToken } =
       await generateAccessAndRefreshToken(user._id);
 
-    res
+    return res
       .status(200)
       .cookie("accessToken", accessToken, options)
       .cookie("refreshToken", newRefreshToken, options)
@@ -283,7 +284,9 @@ const assignRole = asyncHandler(async (req: Request, res: Response) => {
   user.role = parserData.data.role;
   await user.save({ validateBeforeSave: false });
 
-  res.status(200).json(new ApiResponse(200, {}, "Assign role successfully"));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Assign role successfully"));
 });
 
 const changePassword = asyncHandler(async (req: Request, res: Response) => {
@@ -308,7 +311,7 @@ const changePassword = asyncHandler(async (req: Request, res: Response) => {
   user.password = parserData.data.newPassword;
   await user.save({ validateBeforeSave: false });
 
-  res
+  return res
     .status(200)
     .json(new ApiResponse(200, {}, "Password change successfully"));
 });
@@ -342,7 +345,7 @@ const forgotPasswordRequest = asyncHandler(
       ),
     });
 
-    res
+    return res
       .status(200)
       .json(
         new ApiResponse(
@@ -386,7 +389,9 @@ const resetPassword = asyncHandler(async (req: Request, res: Response) => {
   user.password = parserData.data.resetPassword;
   await user.save({ validateBeforeSave: false });
 
-  res.status(200).json(new ApiResponse(200, {}, "Reset password successfully"));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Reset password successfully"));
 });
 
 const sendVerifyEmailRequest = asyncHandler(
@@ -407,7 +412,7 @@ const sendVerifyEmailRequest = asyncHandler(
     user.emailVerificationExpiry = tokenExpiry;
     await user.save({ validateBeforeSave: false });
 
-    sendEmail({
+    await sendEmail({
       email: user.email,
       subject: "Verify your email",
       mailgenClient: verifyEmailMailgenContentEmail(
@@ -418,7 +423,7 @@ const sendVerifyEmailRequest = asyncHandler(
       ),
     });
 
-    res
+    return res
       .status(200)
       .json(
         new ApiResponse(
@@ -463,12 +468,14 @@ const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
   user.isEmailVerify = true;
   await user.save({ validateBeforeSave: false });
 
-  res
+  return res
     .status(200)
     .json(
       new ApiResponse(200, { isEmailVerify: true }, "verify email successfully")
     );
 });
+
+const userPost = asyncHandler(async (req: Request, res: Response) => {});
 
 export {
   userRegister,
@@ -476,7 +483,7 @@ export {
   userSignOut,
   getCurrentUser,
   accountDetailUpdate,
-  avatarUpdate,
+  // avatarUpdate,
   accessRefreshToken,
   assignRole,
   forgotPasswordRequest,
@@ -484,4 +491,5 @@ export {
   sendVerifyEmailRequest,
   verifyEmail,
   changePassword,
+  userPost,
 };
