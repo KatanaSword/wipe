@@ -1,7 +1,8 @@
 import { User } from "../models/user.model";
+import { JwtPayload } from "../type";
 import { ApiError } from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
-import { Request, Response, NextFunction } from "express";
+import { Request, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
 const verifyJWT = asyncHandler(async (req: Request, _, next: NextFunction) => {
@@ -13,7 +14,10 @@ const verifyJWT = asyncHandler(async (req: Request, _, next: NextFunction) => {
       throw new ApiError(401, "Missing or invalid access token");
     }
     // verify a token symmetric - synchronous
-    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECURE!);
+    const decodedToken = jwt.verify(
+      token,
+      process.env.ACCESS_TOKEN_SECURE!
+    ) as JwtPayload;
     if (!decodedToken) {
       throw new ApiError(401, "Missing or invalid token");
     }
@@ -32,8 +36,8 @@ const verifyJWT = asyncHandler(async (req: Request, _, next: NextFunction) => {
   }
 });
 
-const verifyPermission = (roles: string[] = []) => {
-  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+const verifyPermission = (roles: string[] = []): any => {
+  return asyncHandler(async (req: Request, _, next: NextFunction) => {
     if (!req.user._id) {
       throw new ApiError(401, "Unauthorized request");
     }
