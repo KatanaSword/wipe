@@ -6,12 +6,14 @@ const backgroundColorSchema: Schema<IBackgroundColor> = new Schema(
     backgroundColorName: {
       type: String,
       required: true,
+      unique: true,
     },
-    colorHexCode: {
-      type: {
-        colorOne: String,
-        colorTwo: String,
-      },
+    colorOneHexCode: {
+      type: String,
+      required: true,
+    },
+    colorTwoHexCode: {
+      type: String,
       required: true,
     },
     ownerId: {
