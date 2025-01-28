@@ -3,6 +3,10 @@ import { IAspectRatio } from "../type";
 
 const aspectRatioSchema: Schema<IAspectRatio> = new Schema(
   {
+    aspectRatioName: {
+      type: String,
+      required: true,
+    },
     height: {
       type: Number,
       required: true,
@@ -21,7 +25,7 @@ const aspectRatioSchema: Schema<IAspectRatio> = new Schema(
   { timestamps: true }
 );
 
-export const aspectRatio = model<IAspectRatio>(
+export const AspectRatio = model<IAspectRatio>(
   "AspectRatio",
   aspectRatioSchema
 );
