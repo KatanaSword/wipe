@@ -5,30 +5,38 @@ const codeSchema: Schema<ICode> = new Schema(
   {
     fileName: {
       type: String,
+      minlength: 4,
+      maxlength: 15,
       required: true,
       default: "untitled file",
     },
     codeFileName: {
       type: String,
+      minlength: 4,
+      maxlength: 20,
       required: true,
-      default: "script.js",
+      default: "untitled-1",
     },
     code: {
       type: String,
       default:
-        "function chai(name) {for (let i = 0; i < 10; i++) { console.log(`I love ${name} chai`) }}; chai(milk)",
+        "export default function chai(name) {for (let i = 0; i < 10; i++) { console.log(`I love ${name} chai`) }}; chai(milk)",
     },
     language: {
       type: String,
       default: "javaScript",
     },
-    creator: {
+    owner: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    canvasId: {
+    aspectRatioId: {
       type: Schema.Types.ObjectId,
-      ref: "Canvas",
+      ref: "AspectRatio",
+    },
+    backgroundColorId: {
+      type: Schema.Types.ObjectId,
+      ref: "BackgroundColor",
     },
   },
   { timestamps: true }
