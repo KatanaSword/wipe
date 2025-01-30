@@ -6,6 +6,8 @@ const blogSchema: Schema<IBlog> = new Schema(
     fileName: {
       type: String,
       required: true,
+      minLength: 4,
+      maxlength: 15,
       default: "untitled file",
     },
     image: {
@@ -14,16 +16,29 @@ const blogSchema: Schema<IBlog> = new Schema(
         publicId: String,
       },
     },
+    title: {
+      type: String,
+      required: true,
+      minLength: 10,
+      maxLength: 150,
+    },
     summary: {
       type: String,
+      required: true,
+      minlength: 50,
+      maxLength: 250,
     },
-    creator: {
+    owner: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    canvasId: {
+    aspectRatioId: {
       type: Schema.Types.ObjectId,
-      ref: "Canvas",
+      ref: "AspectRatio",
+    },
+    backgroundColorId: {
+      type: Schema.Types.ObjectId,
+      ref: "BackgroundColor",
     },
   },
   { timestamps: true }
