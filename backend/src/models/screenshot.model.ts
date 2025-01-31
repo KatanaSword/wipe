@@ -1,7 +1,7 @@
 import { model, Schema } from "mongoose";
-import { IScreenshort } from "../type";
+import { IScreenshot } from "../type";
 
-const screenshortSchema: Schema<IScreenshort> = new Schema(
+const screenshotSchema: Schema<IScreenshot> = new Schema(
   {
     fileName: {
       type: String,
@@ -14,19 +14,20 @@ const screenshortSchema: Schema<IScreenshort> = new Schema(
         publicId: String,
       },
     },
-    creator: {
+    owner: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    canvasId: {
+    aspectRatioId: {
       type: Schema.Types.ObjectId,
-      ref: "Canvas",
+      ref: "AspectRatio",
+    },
+    backgroundColorId: {
+      type: Schema.Types.ObjectId,
+      ref: "BackgroundColor",
     },
   },
   { timestamps: true }
 );
 
-export const Screenshort = model<IScreenshort>(
-  "Screenshort",
-  screenshortSchema
-);
+export const Screenshot = model<IScreenshot>("Screenshot", screenshotSchema);
