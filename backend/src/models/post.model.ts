@@ -3,12 +3,12 @@ import { IPost } from "../type";
 
 const postSchema: Schema<IPost> = new Schema(
   {
-    screenshorts: {
+    screenshots: {
       type: [
         {
-          screenshortId: {
+          screenshotId: {
             type: Schema.Types.ObjectId,
-            ref: "Screenshort",
+            ref: "Screenshot",
           },
         },
       ],
@@ -47,7 +47,7 @@ const postSchema: Schema<IPost> = new Schema(
       ],
       default: [],
     },
-    owner: {
+    ownerId: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
