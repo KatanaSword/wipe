@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import {
   codeIdSchema,
   createCodeSchema,
+  updateCodeSchema,
 } from "../validations/schemas/code.schema";
 import { ApiError } from "../utils/ApiError";
 import { Code } from "../models/code.model";
@@ -75,4 +76,38 @@ const getCodeById = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse(200, code, "Code fetch successfully"));
 });
 
-export { createCode };
+const updateCode = asyncHandler(async (req: Request, res: Response) => {
+  const parserData = updateCodeSchema.safeParse(req.body);
+  const parserId = codeIdSchema.safeParse(req.params);
+  const errorMessage = parserData.error?.issues.map((issue) => issue.message);
+  if (!parserData.success) {
+    throw new ApiError(400, "Field is empty", errorMessage);
+  }
+  if (!parserId) {
+    throw new ApiError(401, "The code id field is missing or invalid");
+  }
+
+  const code = await Code.findByIdAndUpdate(
+    parserId.data?.codeId,
+    {
+      $set: {
+        codeFileName: parserData.data.codeFileName,
+        code: parserData.data.code,
+        language: parserData.data.language,
+      },
+    },
+    { new: true }
+  );
+  if (!code) {
+    throw new ApiError(
+      500,
+      "Failed to update code post. Please try again later"
+    );
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, code, "Update code post successfully"));
+});
+
+export { createCode, getCodeById, updateCode };
