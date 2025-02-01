@@ -10,6 +10,7 @@ import { Code } from "../models/code.model";
 import { AspectRatio } from "../models/aspectRatio.model";
 import { BackgroundColor } from "../models/backgroundColor.model";
 import { ApiResponse } from "../utils/ApiResponse";
+import { fileNameSchema } from "../validations/schemas/comman.schema";
 
 const createCode = asyncHandler(async (req: Request, res: Response) => {
   const parserData = createCodeSchema.safeParse(req.body);
@@ -22,7 +23,7 @@ const createCode = asyncHandler(async (req: Request, res: Response) => {
     fileName: parserData.data.fileName,
   });
   if (fileNameExist) {
-    throw new ApiError(409, "File name already exist, try another other name");
+    throw new ApiError(409, "File name already exist, try other name");
   }
 
   const aspectRatioToBeAdded = await AspectRatio.findOne({
@@ -84,7 +85,7 @@ const updateCode = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(400, "Field is empty", errorMessage);
   }
   if (!parserId) {
-    throw new ApiError(401, "The code id field is missing or invalid");
+    throw new ApiError(401, "The code id is missing or invalid");
   }
 
   const code = await Code.findByIdAndUpdate(
@@ -110,4 +111,44 @@ const updateCode = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse(200, code, "Update code post successfully"));
 });
 
-export { createCode, getCodeById, updateCode };
+const updateFileName = asyncHandler(async (req: Request, res: Response) => {
+  const parserData = fileNameSchema.safeParse(req.body);
+  const parserId = codeIdSchema.safeParse(req.params);
+  const errorMessage = parserData.error?.issues.map((issue) => issue.message);
+  if (!parserData.success) {
+    throw new ApiError(400, "Field is empty", errorMessage);
+  }
+
+  if (!parserId.success) {
+    throw new ApiError(400, "The code id is missing or invalid");
+  }
+
+  const fileNameExist = await Code.findOne({
+    fileName: parserData.data.fileName,
+  });
+  if (fileNameExist) {
+    throw new ApiError(409, "File name is already exist, try other name");
+  }
+
+  const code = await Code.findByIdAndUpdate(
+    parserId.data.codeId,
+    {
+      $set: {
+        fileName: parserData.data.fileName,
+      },
+    },
+    { new: true }
+  );
+  if (!code) {
+    throw new ApiError(
+      500,
+      "Failed to update file name. Please try again later"
+    );
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, code, "File name update successfully"));
+});
+
+export { createCode, getCodeById, updateCode, updateFileName };
