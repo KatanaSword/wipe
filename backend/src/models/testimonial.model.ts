@@ -8,7 +8,7 @@ const testimonialSchema: Schema<ITestimonial> = new Schema(
       required: true,
       default: "untitled file",
     },
-    avatar: {
+    image: {
       type: {
         url: String,
         publicId: String,
@@ -18,25 +18,30 @@ const testimonialSchema: Schema<ITestimonial> = new Schema(
         publicId: "",
       },
     },
-    name: {
+    fullName: {
       type: String,
-      default: "Saurabh Tajane",
     },
     stars: {
       type: Number,
-      default: 5,
+      min: 1,
+      max: 5,
     },
-    review: {
+    testimonial: {
       type: String,
-      maxlength: 100,
+      minLength: 50,
+      maxlength: 250,
     },
-    creator: {
+    owner: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    canvasId: {
+    aspectRatioId: {
       type: Schema.Types.ObjectId,
-      ref: "Canvas",
+      ref: "AspectRatio",
+    },
+    backgroundColorId: {
+      type: Schema.Types.ObjectId,
+      ref: "BackgroundColor",
     },
   },
   { timestamps: true }
