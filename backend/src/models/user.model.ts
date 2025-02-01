@@ -8,6 +8,7 @@ import {
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { number } from "zod";
 
 const userSchema: Schema<IUser> = new Schema(
   {
@@ -50,14 +51,17 @@ const userSchema: Schema<IUser> = new Schema(
       required: true,
     },
     phoneNumber: {
+      type: Number,
+    },
+    countryCode: {
       type: String,
-      unique: true,
-      minlength: 12,
-      maxlength: 14,
       trim: true,
+      minLength: 2,
+      maxLength: 4,
     },
     fullName: {
       type: String,
+      trim: true,
     },
     refreshToken: {
       type: String,
@@ -118,13 +122,17 @@ userSchema.methods.generateRefreshToken = function () {
   );
 };
 
-userSchema.methods.generateTemporaryToken = function () {
-  const unHashedToken: string = crypto.randomBytes(20).toString("hex");
-  const hashedToken: string = crypto
+userSchema.methods.generateTemporaryToken = function (): {
+  unHashedToken: string;
+  hashedToken: string;
+  tokenExpiry: number;
+} {
+  const unHashedToken = crypto.randomBytes(20).toString("hex");
+  const hashedToken = crypto
     .createHash("sha256")
     .update(unHashedToken)
     .digest("hex");
-  const tokenExpiry: number = Date.now() + USER_TEMPORARY_TOKEN_EXPIRY;
+  const tokenExpiry = Date.now() + USER_TEMPORARY_TOKEN_EXPIRY;
 
   return { unHashedToken, hashedToken, tokenExpiry };
 };
