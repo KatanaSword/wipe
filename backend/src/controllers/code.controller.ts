@@ -10,7 +10,10 @@ import { Code } from "../models/code.model";
 import { AspectRatio } from "../models/aspectRatio.model";
 import { BackgroundColor } from "../models/backgroundColor.model";
 import { ApiResponse } from "../utils/ApiResponse";
-import { fileNameSchema } from "../validations/schemas/comman.schema";
+import {
+  aspectRatioSchema,
+  fileNameSchema,
+} from "../validations/schemas/comman.schema";
 
 const createCode = asyncHandler(async (req: Request, res: Response) => {
   const parserData = createCodeSchema.safeParse(req.body);
@@ -151,4 +154,49 @@ const updateFileName = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse(200, code, "File name update successfully"));
 });
 
-export { createCode, getCodeById, updateCode, updateFileName };
+const updateCodeAspectRatio = asyncHandler(
+  async (req: Request, res: Response) => {
+    const parserData = aspectRatioSchema.safeParse(req.body);
+    const parserId = codeIdSchema.safeParse(req.params);
+    if (!parserId.success) {
+      throw new ApiError(400, "The code id is missing or invalid");
+    }
+
+    const aspectRatioToBeAdded = await Code.findOne({
+      aspectRatioName: parserData.data?.aspectRatioName,
+    });
+    if (!aspectRatioToBeAdded) {
+      throw new ApiError(404, "Aspect ratio not found");
+    }
+
+    const code = await Code.findByIdAndUpdate(
+      parserId.data.codeId,
+      {
+        $set: {
+          aspectRatioId: aspectRatioToBeAdded._id,
+        },
+      },
+      { new: true }
+    );
+    if (!code) {
+      throw new ApiError(
+        500,
+        "Failed to update aspect ratio. Please try again later"
+      );
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, code, "Update code post aspect ratio successfully")
+      );
+  }
+);
+
+export {
+  createCode,
+  getCodeById,
+  updateCode,
+  updateFileName,
+  updateCodeAspectRatio,
+};
