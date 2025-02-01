@@ -12,6 +12,7 @@ import { BackgroundColor } from "../models/backgroundColor.model";
 import { ApiResponse } from "../utils/ApiResponse";
 import {
   aspectRatioSchema,
+  backgroundColorSchema,
   fileNameSchema,
 } from "../validations/schemas/comman.schema";
 
@@ -193,10 +194,50 @@ const updateCodeAspectRatio = asyncHandler(
   }
 );
 
+const updateCodeBackgroundColor = asyncHandler(
+  async (req: Request, res: Response) => {
+    const parserData = backgroundColorSchema.safeParse(req.body);
+    const parserId = codeIdSchema.safeParse(req.params);
+    if (!parserId.success) {
+      throw new ApiError(400, "The code id is missing or invalid");
+    }
+
+    const backgroundColorToBeAdded = await Code.findOne({
+      backgroundColorName: parserData.data?.backgroundColorName,
+    });
+    if (!backgroundColorToBeAdded) {
+      throw new ApiError(404, "Background color not found");
+    }
+
+    const code = await Code.findByIdAndUpdate(
+      parserId.data.codeId,
+      {
+        $set: {
+          backgroundColorId: backgroundColorToBeAdded._id,
+        },
+      },
+      { new: true }
+    );
+    if (!code) {
+      throw new ApiError(
+        500,
+        "Failed to update code background color. Please try again later"
+      );
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, code, "Update code background color successfully")
+      );
+  }
+);
+
 export {
   createCode,
   getCodeById,
   updateCode,
   updateFileName,
   updateCodeAspectRatio,
+  updateCodeBackgroundColor,
 };
