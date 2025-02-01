@@ -1,6 +1,9 @@
 import { asyncHandler } from "../utils/asyncHandler";
 import { Request, Response } from "express";
-import { createCodeSchema } from "../validations/schemas/code.schema";
+import {
+  codeIdSchema,
+  createCodeSchema,
+} from "../validations/schemas/code.schema";
 import { ApiError } from "../utils/ApiError";
 import { Code } from "../models/code.model";
 import { AspectRatio } from "../models/aspectRatio.model";
@@ -22,16 +25,16 @@ const createCode = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const aspectRatioToBeAdded = await AspectRatio.findOne({
-    aspectRatioId: parserData.data.aspectRatioId,
+    aspectRatio: parserData.data.aspectRatioName,
   });
   if (!aspectRatioToBeAdded) {
     throw new ApiError(404, "Aspect ratio not found");
   }
 
-  const backgroundColorId = await BackgroundColor.findOne({
-    backgroundColorId: parserData.data.backgroundColorId,
+  const backgroundColorToBeAdded = await BackgroundColor.findOne({
+    backgroundColor: parserData.data.backgroundColorName,
   });
-  if (!backgroundColorId) {
+  if (!backgroundColorToBeAdded) {
     throw new ApiError(404, "Background color not found");
   }
 
@@ -41,8 +44,8 @@ const createCode = asyncHandler(async (req: Request, res: Response) => {
     code: parserData.data.code,
     language: parserData.data.language,
     owner: req.user._id,
-    aspectRatioId: parserData.data.aspectRatioId,
-    backgroundColorId: parserData.data.backgroundColorId,
+    aspectRatioId: aspectRatioToBeAdded._id,
+    backgroundColorId: backgroundColorToBeAdded._id,
   });
   if (!code) {
     throw new ApiError(
@@ -54,6 +57,22 @@ const createCode = asyncHandler(async (req: Request, res: Response) => {
   return res
     .status(201)
     .json(new ApiResponse(201, code, "Code post create successfully"));
+});
+
+const getCodeById = asyncHandler(async (req: Request, res: Response) => {
+  const parserId = codeIdSchema.safeParse(req.params);
+  if (!parserId.success) {
+    throw new ApiError(400, "The code id field is missing or invalid");
+  }
+
+  const code = await Code.findById(parserId.data.codeId);
+  if (!code) {
+    throw new ApiError(404, "Code post not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, code, "Code fetch successfully"));
 });
 
 export { createCode };
