@@ -233,6 +233,22 @@ const updateCodeBackgroundColor = asyncHandler(
   }
 );
 
+const deleteCode = asyncHandler(async (req: Request, res: Response) => {
+  const parserId = codeIdSchema.safeParse(req.params);
+  if (!parserId.success) {
+    throw new ApiError(400, "The code id is missing or invalid");
+  }
+
+  const code = await Code.findByIdAndDelete(parserId.data.codeId);
+  if (!code) {
+    throw new ApiError(500, "Failed to delete code. Please try again later");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Delete code post successfully"));
+});
+
 export {
   createCode,
   getCodeById,
@@ -240,4 +256,5 @@ export {
   updateFileName,
   updateCodeAspectRatio,
   updateCodeBackgroundColor,
+  deleteCode,
 };
