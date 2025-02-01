@@ -16,6 +16,17 @@ import {
   fileNameSchema,
 } from "../validations/schemas/comman.schema";
 
+const getAllCodes = asyncHandler(async (req: Request, res: Response) => {
+  const codeAggregate = (await Code.aggregate([{ $match: {} }])) as string[];
+  if (codeAggregate.length < 1) {
+    throw new ApiError(404, "Codes not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, codeAggregate, "Codes fetch successfully"));
+});
+
 const createCode = asyncHandler(async (req: Request, res: Response) => {
   const parserData = createCodeSchema.safeParse(req.body);
   const errorMessage = parserData.error?.issues.map((issue) => issue.message);
@@ -257,4 +268,5 @@ export {
   updateCodeAspectRatio,
   updateCodeBackgroundColor,
   deleteCode,
+  getAllCodes,
 };
