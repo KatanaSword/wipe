@@ -1,16 +1,18 @@
 import { z } from "zod";
 
-const createScreenshortSchema = z.object({
-  fileName: z.string().toLowerCase().max(15).default("untitled file"),
+const createScreenshotSchema = z.object({
+  fileName: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .min(4, { message: "Username must be at least 4 characters long" })
+    .max(15, { message: "Username must not exceed 15 characters" }),
+  aspectRatioName: z.string(),
+  backgroundColorName: z.string(),
 });
 
-const imageSchema = z.object({
-  url: z.string(),
-  publicId: z.string(),
+const screenshotIdSchema = z.object({
+  screenshotId: z.string(),
 });
 
-const screenshortIdSchema = z.object({
-  screenshortId: z.string(),
-});
-
-export { createScreenshortSchema, imageSchema, screenshortIdSchema };
+export { createScreenshotSchema, screenshotIdSchema };
