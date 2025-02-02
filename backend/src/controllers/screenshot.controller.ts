@@ -11,6 +11,7 @@ import { uploadFileToS3 } from "../utils/awsS3Backet";
 import { AspectRatio } from "../models/aspectRatio.model";
 import { BackgroundColor } from "../models/backgroundColor.model";
 import {
+  aspectRatioSchema,
   fileNameSchema,
   imageSchema,
 } from "../validations/schemas/comman.schema";
@@ -138,7 +139,49 @@ const updateScreenshotImage = asyncHandler(
 );
 
 const updateScreenshotAspectRatio = asyncHandler(
-  async (req: Request, res: Response) => {}
+  async (req: Request, res: Response) => {
+    const parserId = screenshotIdSchema.safeParse(req.params);
+    const parserData = aspectRatioSchema.safeParse(req.body);
+    if (!parserData.success) {
+      throw new ApiError(400, "Field is empty");
+    }
+    if (!parserId.success) {
+      throw new ApiError(400, "The screenshot id is missing or invalid");
+    }
+
+    const aspectRatioToBeAdded = await AspectRatio.findOne({
+      aspectRatioName: parserData.data.aspectRatioName,
+    });
+    if (!aspectRatioToBeAdded) {
+      throw new ApiError(404, "Aspect ratio not found");
+    }
+
+    const screenshot = await Screenshot.findByIdAndUpdate(
+      parserId.data.screenshotId,
+      {
+        $set: {
+          aspectRatioId: aspectRatioToBeAdded._id,
+        },
+      },
+      { new: true }
+    );
+    if (!screenshot) {
+      throw new ApiError(
+        500,
+        "Failed to update aspect ratio screenshot. Please try again later"
+      );
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          screenshot,
+          "Update aspect ratio in screenshot successfully"
+        )
+      );
+  }
 );
 
 const updateScreenshotBackgroundColor = asyncHandler(
