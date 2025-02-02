@@ -17,9 +17,24 @@ import {
   imageSchema,
 } from "../validations/schemas/comman.schema";
 
-const getAllScreenshots = asyncHandler(
-  async (req: Request, res: Response) => {}
-);
+const getAllScreenshots = asyncHandler(async (req: Request, res: Response) => {
+  const screenshotAggregater = (await Screenshot.aggregate([
+    { $match: {} },
+  ])) as string[];
+  if (screenshotAggregater.length < 1) {
+    throw new ApiError(404, "Screenshots not found");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        screenshotAggregater,
+        "Screenshot fetch successfully"
+      )
+    );
+});
 
 const createScreenshot = asyncHandler(async (req: Request, res: Response) => {
   const parserData = createScreenshotSchema.safeParse(req.body);
