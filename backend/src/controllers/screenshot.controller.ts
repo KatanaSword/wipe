@@ -2,7 +2,10 @@ import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
 import { Request, Response } from "express";
-import { createScreenshotSchema } from "../validations/schemas/screenshot.schema";
+import {
+  createScreenshotSchema,
+  screenshotIdSchema,
+} from "../validations/schemas/screenshot.schema";
 import { Screenshot } from "../models/screenshot.model";
 import { uploadFileToS3 } from "../utils/awsS3Backet";
 import { AspectRatio } from "../models/aspectRatio.model";
@@ -75,9 +78,21 @@ const createScreenshot = asyncHandler(async (req: Request, res: Response) => {
     );
 });
 
-const getScreenshotById = asyncHandler(
-  async (req: Request, res: Response) => {}
-);
+const getScreenshotById = asyncHandler(async (req: Request, res: Response) => {
+  const parserId = screenshotIdSchema.safeParse(req.params);
+  if (!parserId.success) {
+    throw new ApiError(400, "The screenshot id is missing or invalid");
+  }
+
+  const screenshot = await Screenshot.findById(parserId.data.screenshortId);
+  if (!screenshot) {
+    throw new ApiError(404, "Screenshot post not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, screenshot, "Fetch screenshot successfully"));
+});
 
 const updateScreenshot = asyncHandler(
   async (req: Request, res: Response) => {}
