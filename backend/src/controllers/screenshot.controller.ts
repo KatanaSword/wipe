@@ -139,6 +139,46 @@ const updateScreenshotImage = asyncHandler(
   }
 );
 
+const updateFileName = asyncHandler(async (req: Request, res: Response) => {
+  const parserData = fileNameSchema.safeParse(req.body);
+  const parserId = screenshotIdSchema.safeParse(req.params);
+  const errorMessage = parserData.error?.issues.map((issue) => issue.message);
+  if (!parserData.success) {
+    throw new ApiError(400, "Field is empty", errorMessage);
+  }
+
+  if (!parserId.success) {
+    throw new ApiError(400, "The screenshot id is missing or invalid");
+  }
+
+  const fileNameExist = await Screenshot.findOne({
+    fileName: parserData.data.fileName,
+  });
+  if (fileNameExist) {
+    throw new ApiError(409, "File name is already exist, try other name");
+  }
+
+  const screenshot = await Screenshot.findByIdAndUpdate(
+    parserId.data.screenshotId,
+    {
+      $set: {
+        fileName: parserData.data.fileName,
+      },
+    },
+    { new: true }
+  );
+  if (!screenshot) {
+    throw new ApiError(
+      500,
+      "Failed to update file name. Please try again later"
+    );
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, screenshot, "File name update successfully"));
+});
+
 const updateScreenshotAspectRatio = asyncHandler(
   async (req: Request, res: Response) => {
     const parserId = screenshotIdSchema.safeParse(req.params);
@@ -257,6 +297,7 @@ export {
   createScreenshot,
   deleteScreenshot,
   getScreenshotById,
+  updateFileName,
   updateScreenshotAspectRatio,
   updateScreenshotBackgroundColor,
   updateScreenshotImage,
