@@ -26,6 +26,9 @@ const createScreenshot = asyncHandler(async (req: Request, res: Response) => {
   if (!parserData.success) {
     throw new ApiError(400, "Field is empty", errorMessage);
   }
+  if (!imageLocalPath.success) {
+    throw new ApiError(400, "Image file path is missing");
+  }
 
   const fileNameExist = await Screenshot.findOne({
     fileName: parserData.data.fileName,
@@ -94,11 +97,51 @@ const getScreenshotById = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse(200, screenshot, "Fetch screenshot successfully"));
 });
 
-const updateScreenshot = asyncHandler(
+const updateScreenshotImage = asyncHandler(
+  async (req: Request, res: Response) => {
+    const parserId = screenshotIdSchema.safeParse(req.params);
+    const imageLocalPath = imageSchema.safeParse(req.file?.path);
+    if (!parserId.success) {
+      throw new ApiError(400, "The screenshot id is missing or invalid");
+    }
+    if (!imageLocalPath.success) {
+      throw new ApiError(400, "Image file path is missing");
+    }
+
+    const uploadImage = await uploadFileToS3(imageLocalPath, "", "");
+    if (!uploadImage) {
+      throw new ApiError(400, "Image fail to upload");
+    }
+
+    const screenshot = await Screenshot.findByIdAndUpdate(
+      parserId.data.screenshotId,
+      {
+        $set: {
+          image: uploadImage,
+        },
+      },
+      { new: true }
+    );
+    if (!screenshot) {
+      throw new ApiError(
+        500,
+        "Failed to update screenshot image. Please try again later"
+      );
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, screenshot, "Update screenshot image successfully")
+      );
+  }
+);
+
+const updateScreenshotAspectRatio = asyncHandler(
   async (req: Request, res: Response) => {}
 );
 
-const removeScreenshotImage = asyncHandler(
+const updateScreenshotBackgroundColor = asyncHandler(
   async (req: Request, res: Response) => {}
 );
 
@@ -109,8 +152,9 @@ const deleteScreenshot = asyncHandler(
 export {
   getAllScreenshots,
   createScreenshot,
-  updateScreenshot,
   deleteScreenshot,
   getScreenshotById,
-  removeScreenshotImage,
+  updateScreenshotAspectRatio,
+  updateScreenshotBackgroundColor,
+  updateScreenshotImage,
 };
