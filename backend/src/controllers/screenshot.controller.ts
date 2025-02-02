@@ -12,6 +12,7 @@ import { AspectRatio } from "../models/aspectRatio.model";
 import { BackgroundColor } from "../models/backgroundColor.model";
 import {
   aspectRatioSchema,
+  backgroundColorSchema,
   fileNameSchema,
   imageSchema,
 } from "../validations/schemas/comman.schema";
@@ -185,7 +186,49 @@ const updateScreenshotAspectRatio = asyncHandler(
 );
 
 const updateScreenshotBackgroundColor = asyncHandler(
-  async (req: Request, res: Response) => {}
+  async (req: Request, res: Response) => {
+    const parserData = backgroundColorSchema.safeParse(req.body);
+    const parserId = screenshotIdSchema.safeParse(req.params);
+    if (!parserData.success) {
+      throw new ApiError(400, "Field is empty");
+    }
+    if (!parserId.success) {
+      throw new ApiError(400, "The screenshot id is missing or invalid");
+    }
+
+    const backgroundColorToBeAdded = await BackgroundColor.findOne({
+      backgroundColorName: parserData.data.backgroundColorName,
+    });
+    if (!backgroundColorToBeAdded) {
+      throw new ApiError(404, "Aspect ratio not found");
+    }
+
+    const screenshot = await Screenshot.findByIdAndUpdate(
+      parserId.data.screenshotId,
+      {
+        $set: {
+          backgroundColorId: backgroundColorToBeAdded._id,
+        },
+      },
+      { new: true }
+    );
+    if (!screenshot) {
+      throw new ApiError(
+        500,
+        "Failed to update background color screenshot. Please try again later"
+      );
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          screenshot,
+          "Update background color in screenshot successfully"
+        )
+      );
+  }
 );
 
 const deleteScreenshot = asyncHandler(
