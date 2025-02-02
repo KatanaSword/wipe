@@ -231,9 +231,26 @@ const updateScreenshotBackgroundColor = asyncHandler(
   }
 );
 
-const deleteScreenshot = asyncHandler(
-  async (req: Request, res: Response) => {}
-);
+const deleteScreenshot = asyncHandler(async (req: Request, res: Response) => {
+  const parserId = screenshotIdSchema.safeParse(req.params);
+  if (!parserId.success) {
+    throw new ApiError(400, "The screenshot id is missing or invalid");
+  }
+
+  const screenshot = await Screenshot.findByIdAndDelete(
+    parserId.data.screenshotId
+  );
+  if (!screenshot) {
+    throw new ApiError(
+      500,
+      "Failed to delete screenshot. Please try again later"
+    );
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Delete screenshot post successfully"));
+});
 
 export {
   getAllScreenshots,
