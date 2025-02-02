@@ -21,11 +21,13 @@ import userRouter from "./routers/user.router";
 import backgroundColorRouter from "./routers/backgroundColor.router";
 import aspectRatioRouter from "./routers/aspectRatio.router";
 import blogRouter from "./routers/blog.router";
+import codeRouter from "./routers/code.router";
 
 // declear routes
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/background_colors", backgroundColorRouter);
 app.use("/api/v1/aspect_ratios", aspectRatioRouter);
 app.use("/api/v1/blogs", blogRouter);
+app.use("/api/v1/codes", codeRouter);
 
 export default app;
