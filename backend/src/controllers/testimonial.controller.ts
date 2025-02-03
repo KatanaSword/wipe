@@ -3,12 +3,16 @@ import { Request, Response } from "express";
 import {
   createTestimonialSchema,
   testimonialIdSchema,
+  updateTestimonialSchema,
 } from "../validations/schemas/testimonial.schema";
 import { ApiError } from "../utils/ApiError";
 import { AspectRatio } from "../models/aspectRatio.model";
 import { BackgroundColor } from "../models/backgroundColor.model";
 import { uploadFileToS3 } from "../utils/awsS3Backet";
-import { imageSchema } from "../validations/schemas/comman.schema";
+import {
+  fileNameSchema,
+  imageSchema,
+} from "../validations/schemas/comman.schema";
 import { Testimonial } from "../models/testimonial.model";
 import { ApiResponse } from "../utils/ApiResponse";
 
@@ -96,9 +100,41 @@ const getTestimonialById = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse(200, testimonial, "Fetch testimonial successfully"));
 });
 
-const updateTestimonial = asyncHandler(
-  async (req: Request, res: Response) => {}
-);
+const updateTestimonial = asyncHandler(async (req: Request, res: Response) => {
+  const parserData = updateTestimonialSchema.safeParse(req.body);
+  const parserId = testimonialIdSchema.safeParse(req.params);
+  const errorMessage = parserData.error?.issues.map((issue) => issue.message);
+  if (!parserData.success) {
+    throw new ApiError(400, "Field is empty", errorMessage);
+  }
+  if (!parserId.success) {
+    throw new ApiError(400, "Testimonial id is missing or invalid");
+  }
+
+  const testimonial = await Testimonial.findByIdAndUpdate(
+    parserId.data.testimonialId,
+    {
+      $set: {
+        fullName: parserData.data.fullName,
+        stars: parserData.data.stars,
+        testimonial: parserData.data.testimonial,
+      },
+    },
+    { new: true }
+  );
+  if (!testimonial) {
+    throw new ApiError(
+      500,
+      "Failed to update testimonial post. Please try again later"
+    );
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, testimonial, "Update testimonial post successfully")
+    );
+});
 
 const updateFileName = asyncHandler(async (req: Request, res: Response) => {});
 
@@ -118,4 +154,13 @@ const deleteTestimonial = asyncHandler(
   async (req: Request, res: Response) => {}
 );
 
-export { createTestimonial, getTestimonialById };
+export {
+  createTestimonial,
+  getTestimonialById,
+  updateTestimonial,
+  updateFileName,
+  updateTestimonialAspectRatio,
+  updateTestimonialBackgroundColor,
+  updateTestimonialAvatar,
+  deleteTestimonial,
+};
