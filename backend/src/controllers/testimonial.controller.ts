@@ -15,6 +15,7 @@ import {
 } from "../validations/schemas/comman.schema";
 import { Testimonial } from "../models/testimonial.model";
 import { ApiResponse } from "../utils/ApiResponse";
+import { updateAspectRatioSchema } from "../validations/schemas/aspectRatio.schema";
 
 const getAllTestimonials = asyncHandler(
   async (req: Request, res: Response) => {}
@@ -178,7 +179,36 @@ const updateFileName = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const updateTestimonialAspectRatio = asyncHandler(
-  async (req: Request, res: Response) => {}
+  async (req: Request, res: Response) => {
+    const parserData = updateAspectRatioSchema.safeParse(req.body);
+    const parserId = testimonialIdSchema.safeParse(req.params);
+    if (!parserId.success) {
+      throw new ApiError(400, "Testimonial id is missing or invalid");
+    }
+
+    const aspectRatioToBeAdded = await AspectRatio.findOne({
+      aspectRatioName: parserData.data?.aspectRatioName,
+    });
+    if (!aspectRatioToBeAdded) {
+      throw new ApiError(404, "Aspect ratio not successfully");
+    }
+
+    const testimonial = await Testimonial.findByIdAndUpdate(
+      parserId.data.testimonialId,
+      {
+        $set: {
+          aspectRatioId: aspectRatioToBeAdded._id,
+        },
+      },
+      { new: true }
+    );
+    if (!testimonial) {
+      throw new ApiError(
+        500,
+        "Failed to update aspect ratio of testimonial post. Please try again later"
+      );
+    }
+  }
 );
 
 const updateTestimonialBackgroundColor = asyncHandler(
