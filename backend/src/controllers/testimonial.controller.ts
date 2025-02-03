@@ -18,9 +18,22 @@ import { ApiResponse } from "../utils/ApiResponse";
 import { updateAspectRatioSchema } from "../validations/schemas/aspectRatio.schema";
 import { updateBackgroundColorSchema } from "../validations/schemas/backgroundColor.schema";
 
-const getAllTestimonials = asyncHandler(
-  async (req: Request, res: Response) => {}
-);
+const getAllTestimonials = asyncHandler(async (req: Request, res: Response) => {
+  const testimonialAggregater = await Testimonial.aggregate([{ $match: {} }]);
+  if (testimonialAggregater.length < 1) {
+    throw new ApiError(404, "Testimonial not found");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        testimonialAggregater,
+        "Testimonials fetch successfully"
+      )
+    );
+});
 
 const createTestimonial = asyncHandler(async (req: Request, res: Response) => {
   const parserData = createTestimonialSchema.safeParse(req.body);
