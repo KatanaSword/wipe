@@ -80,9 +80,21 @@ const createTestimonial = asyncHandler(async (req: Request, res: Response) => {
     );
 });
 
-const getTestimonialById = asyncHandler(
-  async (req: Request, res: Response) => {}
-);
+const getTestimonialById = asyncHandler(async (req: Request, res: Response) => {
+  const parserId = testimonialIdSchema.safeParse(req.params);
+  if (!parserId.success) {
+    throw new ApiError(400, "Testimonial id is missing");
+  }
+
+  const testimonial = await Testimonial.findById(parserId.data.testimonialId);
+  if (!testimonial) {
+    throw new ApiError(404, "Testimonial not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, testimonial, "Fetch testimonial successfully"));
+});
 
 const updateTestimonial = asyncHandler(
   async (req: Request, res: Response) => {}
