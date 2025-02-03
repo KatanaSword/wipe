@@ -309,9 +309,26 @@ const updateTestimonialAvatar = asyncHandler(
   }
 );
 
-const deleteTestimonial = asyncHandler(
-  async (req: Request, res: Response) => {}
-);
+const deleteTestimonial = asyncHandler(async (req: Request, res: Response) => {
+  const parserId = testimonialIdSchema.safeParse(req.params);
+  if (!parserId.success) {
+    throw new ApiError(400, "Testimonial id is missing or invalid");
+  }
+
+  const testimonial = await Testimonial.findByIdAndDelete(
+    parserId.data.testimonialId
+  );
+  if (!testimonial) {
+    throw new ApiError(
+      500,
+      "Failed to delete testimonial post. Please try again later"
+    );
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Delete testimonial post successfully"));
+});
 
 export {
   createTestimonial,
