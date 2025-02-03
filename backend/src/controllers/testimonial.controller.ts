@@ -16,6 +16,7 @@ import {
 import { Testimonial } from "../models/testimonial.model";
 import { ApiResponse } from "../utils/ApiResponse";
 import { updateAspectRatioSchema } from "../validations/schemas/aspectRatio.schema";
+import { updateBackgroundColorSchema } from "../validations/schemas/backgroundColor.schema";
 
 const getAllTestimonials = asyncHandler(
   async (req: Request, res: Response) => {}
@@ -208,11 +209,60 @@ const updateTestimonialAspectRatio = asyncHandler(
         "Failed to update aspect ratio of testimonial post. Please try again later"
       );
     }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          testimonial,
+          "Update testimonial post aspect ratio"
+        )
+      );
   }
 );
 
 const updateTestimonialBackgroundColor = asyncHandler(
-  async (req: Request, res: Response) => {}
+  async (req: Request, res: Response) => {
+    const parserData = updateBackgroundColorSchema.safeParse(req.body);
+    const parserId = testimonialIdSchema.safeParse(req.params);
+    if (!parserId.success) {
+      throw new ApiError(400, "Testimonial id is missing or invalid");
+    }
+
+    const backgroundColorToBeAdded = await BackgroundColor.findOne({
+      backgroundColorName: parserData.data?.backgroundColorName,
+    });
+    if (!backgroundColorToBeAdded) {
+      throw new ApiError(404, "Background color not successfully");
+    }
+
+    const testimonial = await Testimonial.findByIdAndUpdate(
+      parserId.data.testimonialId,
+      {
+        $set: {
+          backgroundColorId: backgroundColorToBeAdded._id,
+        },
+      },
+      { new: true }
+    );
+    if (!testimonial) {
+      throw new ApiError(
+        500,
+        "Failed to update background color of testimonial post. Please try again later"
+      );
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          testimonial,
+          "Update background color post aspect ratio"
+        )
+      );
+  }
 );
 
 const updateTestimonialAvatar = asyncHandler(
