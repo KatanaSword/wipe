@@ -266,7 +266,47 @@ const updateTestimonialBackgroundColor = asyncHandler(
 );
 
 const updateTestimonialAvatar = asyncHandler(
-  async (req: Request, res: Response) => {}
+  async (req: Request, res: Response) => {
+    const imageLocalPath = imageSchema.safeParse(req.file?.path);
+    const parserId = testimonialIdSchema.safeParse(req.params);
+    if (!parserId.success) {
+      throw new ApiError(400, "Testimonial id is missing or invalid");
+    }
+    if (!imageLocalPath.success) {
+      throw new ApiError(400, "Image fail to upload");
+    }
+
+    const uploadAvatar = await uploadFileToS3(
+      imageLocalPath.data.image,
+      "",
+      ""
+    );
+    if (!uploadAvatar) {
+      throw new ApiError(400, "Avatar failed to upload");
+    }
+
+    const testimonial = await Testimonial.findByIdAndUpdate(
+      parserId.data.testimonialId,
+      {
+        $set: {
+          image: uploadAvatar,
+        },
+      },
+      { new: true }
+    );
+    if (!testimonial) {
+      throw new ApiError(
+        500,
+        "Failed to update avatar testimonial post. Please try again later"
+      );
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, testimonial, "Update avatar testimonial post")
+      );
+  }
 );
 
 const deleteTestimonial = asyncHandler(
