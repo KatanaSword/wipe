@@ -136,7 +136,46 @@ const updateTestimonial = asyncHandler(async (req: Request, res: Response) => {
     );
 });
 
-const updateFileName = asyncHandler(async (req: Request, res: Response) => {});
+const updateFileName = asyncHandler(async (req: Request, res: Response) => {
+  const parserData = fileNameSchema.safeParse(req.body);
+  const parserId = testimonialIdSchema.safeParse(req.params);
+  const errorMessage = parserData.error?.issues.map((issue) => issue.message);
+  if (!parserData.success) {
+    throw new ApiError(400, "Field is empty", errorMessage);
+  }
+  if (!parserId.success) {
+    throw new ApiError(400, "Testimonial id is missing or invalid");
+  }
+
+  const fileNameExist = await Testimonial.findOne({
+    fileName: parserData.data.fileName,
+  });
+  if (fileNameExist) {
+    throw new ApiError(409, "File name already exist, try other name");
+  }
+
+  const testimonial = await Testimonial.findByIdAndUpdate(
+    parserId.data.testimonialId,
+    {
+      $set: {
+        fileName: parserData.data.fileName,
+      },
+    },
+    { new: true }
+  );
+  if (!testimonial) {
+    throw new ApiError(
+      500,
+      "Failed to update filename testimonial post. Please try again later"
+    );
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, testimonial, "Update filename of testimonial post")
+    );
+});
 
 const updateTestimonialAspectRatio = asyncHandler(
   async (req: Request, res: Response) => {}
