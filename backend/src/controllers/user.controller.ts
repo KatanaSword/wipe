@@ -174,7 +174,7 @@ const accountDetailUpdate = asyncHandler(
       throw new ApiError(400, "", errorMessage);
     }
 
-    const user = await User.findByIdAndUpdate(
+    const updateUser = await User.findByIdAndUpdate(
       req.user._id,
       {
         $set: {
@@ -185,13 +185,13 @@ const accountDetailUpdate = asyncHandler(
       },
       { new: true }
     ).select("-password -refreshToken");
-    if (!user) {
+    if (!updateUser) {
       throw new ApiError(500, "Account update failed, Please try again later.");
     }
 
     return res
       .status(200)
-      .json(new ApiResponse(200, user, "Account update successfully"));
+      .json(new ApiResponse(200, updateUser, "Account update successfully"));
   }
 );
 

@@ -10,19 +10,15 @@ import { AspectRatio } from "../models/aspectRatio.model";
 import { ApiResponse } from "../utils/ApiResponse";
 
 const getAllAspectRatio = asyncHandler(async (req: Request, res: Response) => {
-  const aspectRatioAggregate = await AspectRatio.aggregate([{ $match: {} }]);
-  if (aspectRatioAggregate.length < 1) {
+  const aspectRatios = await AspectRatio.aggregate([{ $match: {} }]);
+  if (aspectRatios.length < 1) {
     throw new ApiError(404, "Aspect ratio not found");
   }
 
   return res
     .status(200)
     .json(
-      new ApiResponse(
-        200,
-        aspectRatioAggregate,
-        "Aspect ratio fetch successfully"
-      )
+      new ApiResponse(200, aspectRatios, "Aspect ratio fetch successfully")
     );
 });
 
@@ -100,7 +96,7 @@ const updateAspectRatio = asyncHandler(async (req: Request, res: Response) => {
     );
   }
 
-  const aspectRatio = await AspectRatio.findByIdAndUpdate(
+  const updateAspectRatio = await AspectRatio.findByIdAndUpdate(
     parserId.data.aspectRatioId,
     {
       $set: {
@@ -111,7 +107,7 @@ const updateAspectRatio = asyncHandler(async (req: Request, res: Response) => {
     },
     { new: true }
   );
-  if (!aspectRatio) {
+  if (!updateAspectRatio) {
     throw new ApiError(
       500,
       "Aspect ratio update failed, Please try again later"
@@ -121,7 +117,11 @@ const updateAspectRatio = asyncHandler(async (req: Request, res: Response) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(200, aspectRatio, "Aspect ratio update successfully")
+      new ApiResponse(
+        200,
+        updateAspectRatio,
+        "Aspect ratio update successfully"
+      )
     );
 });
 

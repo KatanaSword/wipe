@@ -18,22 +18,16 @@ import {
 } from "../validations/schemas/comman.schema";
 
 const getAllScreenshots = asyncHandler(async (req: Request, res: Response) => {
-  const screenshotAggregater = (await Screenshot.aggregate([
+  const screenshots = (await Screenshot.aggregate([
     { $match: {} },
   ])) as string[];
-  if (screenshotAggregater.length < 1) {
+  if (screenshots.length < 1) {
     throw new ApiError(404, "Screenshots not found");
   }
 
   return res
     .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        screenshotAggregater,
-        "Screenshot fetch successfully"
-      )
-    );
+    .json(new ApiResponse(200, screenshots, "Screenshot fetch successfully"));
 });
 
 const createScreenshot = asyncHandler(async (req: Request, res: Response) => {
@@ -130,7 +124,7 @@ const updateScreenshotImage = asyncHandler(
       throw new ApiError(400, "Image fail to upload");
     }
 
-    const screenshot = await Screenshot.findByIdAndUpdate(
+    const updateScreenshotImage = await Screenshot.findByIdAndUpdate(
       parserId.data.screenshotId,
       {
         $set: {
@@ -139,7 +133,7 @@ const updateScreenshotImage = asyncHandler(
       },
       { new: true }
     );
-    if (!screenshot) {
+    if (!updateScreenshotImage) {
       throw new ApiError(
         500,
         "Failed to update screenshot image. Please try again later"
@@ -149,7 +143,11 @@ const updateScreenshotImage = asyncHandler(
     return res
       .status(200)
       .json(
-        new ApiResponse(200, screenshot, "Update screenshot image successfully")
+        new ApiResponse(
+          200,
+          updateScreenshotImage,
+          "Update screenshot image successfully"
+        )
       );
   }
 );
@@ -173,7 +171,7 @@ const updateFileName = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(409, "File name is already exist, try other name");
   }
 
-  const screenshot = await Screenshot.findByIdAndUpdate(
+  const updateFileName = await Screenshot.findByIdAndUpdate(
     parserId.data.screenshotId,
     {
       $set: {
@@ -182,7 +180,7 @@ const updateFileName = asyncHandler(async (req: Request, res: Response) => {
     },
     { new: true }
   );
-  if (!screenshot) {
+  if (!updateFileName) {
     throw new ApiError(
       500,
       "Failed to update file name. Please try again later"
@@ -191,7 +189,9 @@ const updateFileName = asyncHandler(async (req: Request, res: Response) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, screenshot, "File name update successfully"));
+    .json(
+      new ApiResponse(200, updateFileName, "File name update successfully")
+    );
 });
 
 const updateScreenshotAspectRatio = asyncHandler(
@@ -212,7 +212,7 @@ const updateScreenshotAspectRatio = asyncHandler(
       throw new ApiError(404, "Aspect ratio not found");
     }
 
-    const screenshot = await Screenshot.findByIdAndUpdate(
+    const updateScreenshotAspectRatio = await Screenshot.findByIdAndUpdate(
       parserId.data.screenshotId,
       {
         $set: {
@@ -221,7 +221,7 @@ const updateScreenshotAspectRatio = asyncHandler(
       },
       { new: true }
     );
-    if (!screenshot) {
+    if (!updateScreenshotAspectRatio) {
       throw new ApiError(
         500,
         "Failed to update aspect ratio screenshot. Please try again later"
@@ -233,7 +233,7 @@ const updateScreenshotAspectRatio = asyncHandler(
       .json(
         new ApiResponse(
           200,
-          screenshot,
+          updateScreenshotAspectRatio,
           "Update aspect ratio in screenshot successfully"
         )
       );
@@ -258,7 +258,7 @@ const updateScreenshotBackgroundColor = asyncHandler(
       throw new ApiError(404, "Aspect ratio not found");
     }
 
-    const screenshot = await Screenshot.findByIdAndUpdate(
+    const updateScreenshotBackgroundColor = await Screenshot.findByIdAndUpdate(
       parserId.data.screenshotId,
       {
         $set: {
@@ -267,7 +267,7 @@ const updateScreenshotBackgroundColor = asyncHandler(
       },
       { new: true }
     );
-    if (!screenshot) {
+    if (!updateScreenshotBackgroundColor) {
       throw new ApiError(
         500,
         "Failed to update background color screenshot. Please try again later"
@@ -279,7 +279,7 @@ const updateScreenshotBackgroundColor = asyncHandler(
       .json(
         new ApiResponse(
           200,
-          screenshot,
+          updateScreenshotBackgroundColor,
           "Update background color in screenshot successfully"
         )
       );

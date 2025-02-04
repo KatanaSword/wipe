@@ -16,7 +16,7 @@ import {
   fileNameSchema,
 } from "../validations/schemas/comman.schema";
 
-const getAllCodes = asyncHandler(async (req: Request, res: Response) => {
+const getAllCodes = asyncHandler(async (_, res: Response) => {
   const codeAggregate = (await Code.aggregate([{ $match: {} }])) as string[];
   if (codeAggregate.length < 1) {
     throw new ApiError(404, "Codes not found");
@@ -103,7 +103,7 @@ const updateCode = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(401, "The code id is missing or invalid");
   }
 
-  const code = await Code.findByIdAndUpdate(
+  const updateCode = await Code.findByIdAndUpdate(
     parserId.data?.codeId,
     {
       $set: {
@@ -114,7 +114,7 @@ const updateCode = asyncHandler(async (req: Request, res: Response) => {
     },
     { new: true }
   );
-  if (!code) {
+  if (!updateCode) {
     throw new ApiError(
       500,
       "Failed to update code post. Please try again later"
@@ -123,7 +123,7 @@ const updateCode = asyncHandler(async (req: Request, res: Response) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, code, "Update code post successfully"));
+    .json(new ApiResponse(200, updateCode, "Update code post successfully"));
 });
 
 const updateFileName = asyncHandler(async (req: Request, res: Response) => {
@@ -145,7 +145,7 @@ const updateFileName = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(409, "File name is already exist, try other name");
   }
 
-  const code = await Code.findByIdAndUpdate(
+  const updateFileName = await Code.findByIdAndUpdate(
     parserId.data.codeId,
     {
       $set: {
@@ -154,7 +154,7 @@ const updateFileName = asyncHandler(async (req: Request, res: Response) => {
     },
     { new: true }
   );
-  if (!code) {
+  if (!updateFileName) {
     throw new ApiError(
       500,
       "Failed to update file name. Please try again later"
@@ -163,7 +163,9 @@ const updateFileName = asyncHandler(async (req: Request, res: Response) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, code, "File name update successfully"));
+    .json(
+      new ApiResponse(200, updateFileName, "File name update successfully")
+    );
 });
 
 const updateCodeAspectRatio = asyncHandler(
@@ -181,7 +183,7 @@ const updateCodeAspectRatio = asyncHandler(
       throw new ApiError(404, "Aspect ratio not found");
     }
 
-    const code = await Code.findByIdAndUpdate(
+    const updateCodeAspectRatio = await Code.findByIdAndUpdate(
       parserId.data.codeId,
       {
         $set: {
@@ -190,7 +192,7 @@ const updateCodeAspectRatio = asyncHandler(
       },
       { new: true }
     );
-    if (!code) {
+    if (!updateCodeAspectRatio) {
       throw new ApiError(
         500,
         "Failed to update aspect ratio. Please try again later"
@@ -200,7 +202,11 @@ const updateCodeAspectRatio = asyncHandler(
     return res
       .status(200)
       .json(
-        new ApiResponse(200, code, "Update code post aspect ratio successfully")
+        new ApiResponse(
+          200,
+          updateCodeAspectRatio,
+          "Update code post aspect ratio successfully"
+        )
       );
   }
 );
@@ -220,7 +226,7 @@ const updateCodeBackgroundColor = asyncHandler(
       throw new ApiError(404, "Background color not found");
     }
 
-    const code = await Code.findByIdAndUpdate(
+    const updateCodeBackgroundColor = await Code.findByIdAndUpdate(
       parserId.data.codeId,
       {
         $set: {
@@ -229,7 +235,7 @@ const updateCodeBackgroundColor = asyncHandler(
       },
       { new: true }
     );
-    if (!code) {
+    if (!updateCodeBackgroundColor) {
       throw new ApiError(
         500,
         "Failed to update code background color. Please try again later"
@@ -239,7 +245,11 @@ const updateCodeBackgroundColor = asyncHandler(
     return res
       .status(200)
       .json(
-        new ApiResponse(200, code, "Update code background color successfully")
+        new ApiResponse(
+          200,
+          updateCodeBackgroundColor,
+          "Update code background color successfully"
+        )
       );
   }
 );

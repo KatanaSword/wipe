@@ -18,23 +18,22 @@ import { AspectRatio } from "../models/aspectRatio.model";
 import { BackgroundColor } from "../models/backgroundColor.model";
 import { ApiResponse } from "../utils/ApiResponse";
 
-const getAllBlogs = asyncHandler(async (req: Request, res: Response) => {
-  const blogAggregate = await Blog.aggregate([{ $match: {} }]);
-  if (blogAggregate.length < 1) {
+const getAllBlogs = asyncHandler(async (_, res: Response) => {
+  const blogs = await Blog.aggregate([{ $match: {} }]);
+  if (blogs.length < 1) {
     throw new ApiError(404, "Blogs not found");
   }
 
   return res
     .status(200)
-    .json(new ApiResponse(200, blogAggregate, "Blogs fetch successfully"));
+    .json(new ApiResponse(200, blogs, "Blogs fetch successfully"));
 });
 
 const createBlog = asyncHandler(async (req: Request, res: Response) => {
   const parserData = createBlogSchema.safeParse(req.body);
-  const parserFileName = fileNameSchema.safeParse(req.body);
   const imageLocalPath = imageSchema.safeParse(req.file?.path);
   const errorMessage = parserData.error?.issues.map((issue) => issue.message);
-  if (!parserData.success || !parserFileName.success) {
+  if (!parserData.success) {
     throw new ApiError(400, "Field is empty", errorMessage);
   }
 
@@ -43,7 +42,7 @@ const createBlog = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const fileNameExist = await Blog.findOne({
-    fileName: parserFileName.data.fileName,
+    fileName: parserData.data.fileName,
   });
   if (fileNameExist) {
     throw new ApiError(409, "File name already exist, try another other name");
@@ -69,7 +68,7 @@ const createBlog = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const blog = await Blog.create({
-    fileName: parserFileName.data.fileName,
+    fileName: parserData.data.fileName,
     title: parserData.data.title,
     summary: parserData.data.summary,
     image: uploadImage,
@@ -116,7 +115,7 @@ const updateBlog = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(400, "The blog id field is missing or invalid");
   }
 
-  const blog = await Blog.findByIdAndUpdate(
+  const updateBlog = await Blog.findByIdAndUpdate(
     parserId.data.blogId,
     {
       $set: {
@@ -126,16 +125,16 @@ const updateBlog = asyncHandler(async (req: Request, res: Response) => {
     },
     { new: true }
   );
-  if (!blog) {
+  if (!updateBlog) {
     throw new ApiError(500, "Blog update failed, Please try again later");
   }
 
   return res
     .status(200)
-    .json(new ApiResponse(200, blog, "Update blog successfully"));
+    .json(new ApiResponse(200, updateBlog, "Update blog successfully"));
 });
 
-const updateBlogFileName = asyncHandler(async (req: Request, res: Response) => {
+const updateFileName = asyncHandler(async (req: Request, res: Response) => {
   const parserData = fileNameSchema.safeParse(req.body);
   const parserId = blogIdSchema.safeParse(req.params);
   const errorMessage = parserData.error?.issues.map((issue) => issue.message);
@@ -153,20 +152,22 @@ const updateBlogFileName = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(409, "File name already exist, try other name");
   }
 
-  const fileName = await Blog.findByIdAndUpdate(
+  const updateFileName = await Blog.findByIdAndUpdate(
     parserId.data.blogId,
     {
       $set: { fileName: parserData.data.fileName },
     },
     { new: true }
   );
-  if (!fileName) {
+  if (!updateFileName) {
     throw new ApiError(500, "File name update failed, Please try again later");
   }
 
   return res
     .status(200)
-    .json(new ApiResponse(200, fileName, "File name update successfully"));
+    .json(
+      new ApiResponse(200, updateFileName, "File name update successfully")
+    );
 });
 
 const updateBlogImage = asyncHandler(async (req: Request, res: Response) => {
@@ -184,20 +185,20 @@ const updateBlogImage = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(400, "");
   }
 
-  const blog = await Blog.findByIdAndUpdate(
+  const updateBlogImage = await Blog.findByIdAndUpdate(
     parserId.data.blogId,
     {
       $set: { image: uploadImage },
     },
     { new: true }
   );
-  if (!blog) {
+  if (!updateBlogImage) {
     throw new ApiError(500, "Image update failed, Please try again later");
   }
 
   return res
     .status(200)
-    .json(new ApiResponse(200, blog, "Update image successfully"));
+    .json(new ApiResponse(200, updateBlogImage, "Update image successfully"));
 });
 
 const updateBlogAspectRatio = asyncHandler(
@@ -218,14 +219,14 @@ const updateBlogAspectRatio = asyncHandler(
       throw new ApiError(404, "Aspect ratio not found");
     }
 
-    const blog = await Blog.findByIdAndUpdate(
+    const updateBlogAspectRatio = await Blog.findByIdAndUpdate(
       parserId.data.blogId,
       {
         $set: { aspectRatioId: aspectRatioToBeAdded._id },
       },
       { new: true }
     );
-    if (!blog) {
+    if (!updateBlogAspectRatio) {
       throw new ApiError(
         500,
         "Failed to update aspect ratio. Please try again later"
@@ -234,7 +235,13 @@ const updateBlogAspectRatio = asyncHandler(
 
     return res
       .status(200)
-      .json(new ApiResponse(200, blog, "Update aspect ratio successfully"));
+      .json(
+        new ApiResponse(
+          200,
+          updateBlogAspectRatio,
+          "Update aspect ratio successfully"
+        )
+      );
   }
 );
 
@@ -256,14 +263,14 @@ const updateBlogBackgroundColor = asyncHandler(
       throw new ApiError(404, "Background color not found");
     }
 
-    const blog = await Blog.findByIdAndUpdate(
+    const updateBlogBackgroundColor = await Blog.findByIdAndUpdate(
       parserId.data.blogId,
       {
         $set: { backgroundColorId: backgroundColorToBeAdded._id },
       },
       { new: true }
     );
-    if (!blog) {
+    if (!updateBlogBackgroundColor) {
       throw new ApiError(
         500,
         "Failed to update background color. Please try again later"
@@ -272,7 +279,13 @@ const updateBlogBackgroundColor = asyncHandler(
 
     return res
       .status(200)
-      .json(new ApiResponse(200, blog, "Update background color successfully"));
+      .json(
+        new ApiResponse(
+          200,
+          updateBlogBackgroundColor,
+          "Update background color successfully"
+        )
+      );
   }
 );
 
@@ -297,7 +310,7 @@ export {
   createBlog,
   getBlogById,
   updateBlog,
-  updateBlogFileName,
+  updateFileName,
   updateBlogImage,
   updateBlogAspectRatio,
   updateBlogBackgroundColor,

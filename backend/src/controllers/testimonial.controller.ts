@@ -18,20 +18,16 @@ import { ApiResponse } from "../utils/ApiResponse";
 import { updateAspectRatioSchema } from "../validations/schemas/aspectRatio.schema";
 import { updateBackgroundColorSchema } from "../validations/schemas/backgroundColor.schema";
 
-const getAllTestimonials = asyncHandler(async (req: Request, res: Response) => {
-  const testimonialAggregater = await Testimonial.aggregate([{ $match: {} }]);
-  if (testimonialAggregater.length < 1) {
+const getAllTestimonials = asyncHandler(async (_, res: Response) => {
+  const testimonials = await Testimonial.aggregate([{ $match: {} }]);
+  if (testimonials.length < 1) {
     throw new ApiError(404, "Testimonial not found");
   }
 
   return res
     .status(200)
     .json(
-      new ApiResponse(
-        200,
-        testimonialAggregater,
-        "Testimonials fetch successfully"
-      )
+      new ApiResponse(200, testimonials, "Testimonials fetch successfully")
     );
 });
 
@@ -126,7 +122,7 @@ const updateTestimonial = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(400, "Testimonial id is missing or invalid");
   }
 
-  const testimonial = await Testimonial.findByIdAndUpdate(
+  const updateTestimonial = await Testimonial.findByIdAndUpdate(
     parserId.data.testimonialId,
     {
       $set: {
@@ -137,7 +133,7 @@ const updateTestimonial = asyncHandler(async (req: Request, res: Response) => {
     },
     { new: true }
   );
-  if (!testimonial) {
+  if (!updateTestimonial) {
     throw new ApiError(
       500,
       "Failed to update testimonial post. Please try again later"
@@ -147,7 +143,11 @@ const updateTestimonial = asyncHandler(async (req: Request, res: Response) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(200, testimonial, "Update testimonial post successfully")
+      new ApiResponse(
+        200,
+        updateTestimonial,
+        "Update testimonial post successfully"
+      )
     );
 });
 
@@ -169,7 +169,7 @@ const updateFileName = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(409, "File name already exist, try other name");
   }
 
-  const testimonial = await Testimonial.findByIdAndUpdate(
+  const updateFileName = await Testimonial.findByIdAndUpdate(
     parserId.data.testimonialId,
     {
       $set: {
@@ -178,7 +178,7 @@ const updateFileName = asyncHandler(async (req: Request, res: Response) => {
     },
     { new: true }
   );
-  if (!testimonial) {
+  if (!updateFileName) {
     throw new ApiError(
       500,
       "Failed to update filename testimonial post. Please try again later"
@@ -188,7 +188,11 @@ const updateFileName = asyncHandler(async (req: Request, res: Response) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(200, testimonial, "Update filename of testimonial post")
+      new ApiResponse(
+        200,
+        updateFileName,
+        "Update filename of testimonial post"
+      )
     );
 });
 
@@ -207,7 +211,7 @@ const updateTestimonialAspectRatio = asyncHandler(
       throw new ApiError(404, "Aspect ratio not successfully");
     }
 
-    const testimonial = await Testimonial.findByIdAndUpdate(
+    const updateTestimonialAspectRatio = await Testimonial.findByIdAndUpdate(
       parserId.data.testimonialId,
       {
         $set: {
@@ -216,7 +220,7 @@ const updateTestimonialAspectRatio = asyncHandler(
       },
       { new: true }
     );
-    if (!testimonial) {
+    if (!updateTestimonialAspectRatio) {
       throw new ApiError(
         500,
         "Failed to update aspect ratio of testimonial post. Please try again later"
@@ -228,7 +232,7 @@ const updateTestimonialAspectRatio = asyncHandler(
       .json(
         new ApiResponse(
           200,
-          testimonial,
+          updateTestimonialAspectRatio,
           "Update testimonial post aspect ratio"
         )
       );
@@ -250,16 +254,17 @@ const updateTestimonialBackgroundColor = asyncHandler(
       throw new ApiError(404, "Background color not successfully");
     }
 
-    const testimonial = await Testimonial.findByIdAndUpdate(
-      parserId.data.testimonialId,
-      {
-        $set: {
-          backgroundColorId: backgroundColorToBeAdded._id,
+    const updateTestimonialBackgroundColor =
+      await Testimonial.findByIdAndUpdate(
+        parserId.data.testimonialId,
+        {
+          $set: {
+            backgroundColorId: backgroundColorToBeAdded._id,
+          },
         },
-      },
-      { new: true }
-    );
-    if (!testimonial) {
+        { new: true }
+      );
+    if (!updateTestimonialBackgroundColor) {
       throw new ApiError(
         500,
         "Failed to update background color of testimonial post. Please try again later"
@@ -271,7 +276,7 @@ const updateTestimonialBackgroundColor = asyncHandler(
       .json(
         new ApiResponse(
           200,
-          testimonial,
+          updateTestimonialBackgroundColor,
           "Update background color post aspect ratio"
         )
       );
@@ -298,7 +303,7 @@ const updateTestimonialAvatar = asyncHandler(
       throw new ApiError(400, "Avatar failed to upload");
     }
 
-    const testimonial = await Testimonial.findByIdAndUpdate(
+    const updateTestimonialAvatar = await Testimonial.findByIdAndUpdate(
       parserId.data.testimonialId,
       {
         $set: {
@@ -307,7 +312,7 @@ const updateTestimonialAvatar = asyncHandler(
       },
       { new: true }
     );
-    if (!testimonial) {
+    if (!updateTestimonialAvatar) {
       throw new ApiError(
         500,
         "Failed to update avatar testimonial post. Please try again later"
@@ -317,7 +322,11 @@ const updateTestimonialAvatar = asyncHandler(
     return res
       .status(200)
       .json(
-        new ApiResponse(200, testimonial, "Update avatar testimonial post")
+        new ApiResponse(
+          200,
+          updateTestimonialAvatar,
+          "Update avatar testimonial post"
+        )
       );
   }
 );
@@ -344,6 +353,7 @@ const deleteTestimonial = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export {
+  getAllTestimonials,
   createTestimonial,
   getTestimonialById,
   updateTestimonial,

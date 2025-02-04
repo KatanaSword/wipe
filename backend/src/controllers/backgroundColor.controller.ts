@@ -9,26 +9,22 @@ import { ApiError } from "../utils/ApiError";
 import { BackgroundColor } from "../models/backgroundColor.model";
 import { ApiResponse } from "../utils/ApiResponse";
 
-const getAllBackgroundColors = asyncHandler(
-  async (req: Request, res: Response) => {
-    const backgroundColorAggregate = await BackgroundColor.aggregate([
-      { $match: {} },
-    ]);
-    if (backgroundColorAggregate.length < 1) {
-      throw new ApiError(404, "Background color not found");
-    }
-
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          backgroundColorAggregate,
-          "Background color fetch successfully"
-        )
-      );
+const getAllBackgroundColors = asyncHandler(async (_, res: Response) => {
+  const backgroundColors = await BackgroundColor.aggregate([{ $match: {} }]);
+  if (backgroundColors.length < 1) {
+    throw new ApiError(404, "Background color not found");
   }
-);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        backgroundColors,
+        "Background color fetch successfully"
+      )
+    );
+});
 
 const createBackgroundColor = asyncHandler(
   async (req: Request, res: Response) => {
@@ -131,7 +127,7 @@ const updateBackgroundColor = asyncHandler(
       );
     }
 
-    const backgroundColor = await BackgroundColor.findByIdAndUpdate(
+    const updateBackgroundColor = await BackgroundColor.findByIdAndUpdate(
       parserId.data.backgroundColorId,
       {
         $set: {
@@ -142,7 +138,7 @@ const updateBackgroundColor = asyncHandler(
       },
       { new: true }
     );
-    if (!backgroundColor) {
+    if (!updateBackgroundColor) {
       throw new ApiError(
         500,
         "Background color update failed, Please try again later"
@@ -154,7 +150,7 @@ const updateBackgroundColor = asyncHandler(
       .json(
         new ApiResponse(
           200,
-          backgroundColor,
+          updateBackgroundColor,
           "Background color update successfully"
         )
       );
