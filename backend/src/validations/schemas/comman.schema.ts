@@ -15,11 +15,11 @@ const fileNameSchema = z.object({
 });
 
 const aspectRatioSchema = z.object({
-  aspectRatio: z.string().optional(),
+  aspectRatioName: z.string().optional(),
 });
 
 const backgroundColorSchema = z.object({
-  backgroundColor: z.string().optional(),
+  backgroundColorName: z.string().optional(),
 });
 
 export {

@@ -5,7 +5,7 @@ const userRegisterSchema = z.object({
     .string()
     .toLowerCase()
     .trim()
-    .min(4, { message: "Username must be at least 4 characters long." })
+    .min(4, { message: "Username must be at least 4 characters long" })
     .max(20, { message: "Username must not exceed 20 characters" }),
   email: z.string().trim().email({ message: "Email invalid" }),
   password: z

@@ -6,8 +6,7 @@ const createTestimonialSchema = z.object({
     .trim()
     .toLowerCase()
     .min(4, { message: "File name must be at least 4 characters long" })
-    .max(15, { message: "File name must not exceed 15 characters" })
-    .default("untitled file"),
+    .max(15, { message: "File name must not exceed 15 characters" }),
   fullName: z
     .string()
     .trim()
@@ -18,8 +17,8 @@ const createTestimonialSchema = z.object({
     .string()
     .min(50, { message: "Testimonial must be at least 50 characters long" })
     .max(250, { message: "Testimonial must not exceed 250 characters" }),
-  aspectRatioId: z.string(),
-  backgroundColorId: z.string(),
+  aspectRatioName: z.string(),
+  backgroundColorName: z.string(),
 });
 
 const updateTestimonialSchema = z.object({

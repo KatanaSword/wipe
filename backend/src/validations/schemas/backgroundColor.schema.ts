@@ -9,18 +9,12 @@ const createBackgroundColorSchema = z.object({
     .max(15, {
       message: "Background color name must not exceed 15 characters",
     }),
-  colorOne: z
-    .string()
-    .regex(
-      /^#(?:[a-fA-F][0-9a-f]{2}|[a-fA-F][0-9a-f]{3}|[a-fA-F][0-9a-f]{5}|[a-fA-F][0-9a-f]{7})$/,
-      { message: "Invalid color hex code" }
-    ),
-  colorTwo: z
-    .string()
-    .regex(
-      /^#(?:[a-fA-F][0-9a-f]{2}|[a-fA-F][0-9a-f]{3}|[a-fA-F][0-9a-f]{5}|[a-fA-F][0-9a-f]{7})$/,
-      { message: "Invalid color hex code" }
-    ),
+  colorOneHexCode: z.string().regex(/#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})/, {
+    message: "Invalid color hex code",
+  }),
+  colorTwoHexCode: z.string().regex(/#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})/, {
+    message: "Invalid color hex code",
+  }),
 });
 
 const updateBackgroundColorSchema = z.object({
@@ -33,19 +27,17 @@ const updateBackgroundColorSchema = z.object({
       message: "Background color name must not exceed 15 characters",
     })
     .optional(),
-  colorOne: z
+  colorOneHexCode: z
     .string()
-    .regex(
-      /^#(?:[a-fA-F][0-9a-f]{2}|[a-fA-F][0-9a-f]{3}|[a-fA-F][0-9a-f]{5}|[a-fA-F][0-9a-f]{7})$/,
-      { message: "Invalid color hex code" }
-    )
+    .regex(/#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})/, {
+      message: "Invalid color hex code",
+    })
     .optional(),
-  colorTwo: z
+  colorTwoHexCode: z
     .string()
-    .regex(
-      /^#(?:[a-fA-F][0-9a-f]{2}|[a-fA-F][0-9a-f]{3}|[a-fA-F][0-9a-f]{5}|[a-fA-F][0-9a-f]{7})$/,
-      { message: "Invalid color hex code" }
-    )
+    .regex(/#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})/, {
+      message: "Invalid color hex code",
+    })
     .optional(),
 });
 

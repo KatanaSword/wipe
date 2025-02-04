@@ -17,8 +17,8 @@ const createBlogSchema = z.object({
     .trim()
     .min(50, { message: "Summary must be at least 50 characters long" })
     .max(250, { message: "Summary must not exceed 250 characters" }),
-  aspectRatio: z.string(),
-  backgroundColor: z.string(),
+  aspectRatioName: z.string(),
+  backgroundColorName: z.string(),
 });
 
 const updateBlogSchema = z.object({
