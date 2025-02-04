@@ -7,7 +7,7 @@ import {
   updateBlog,
   updateBlogAspectRatio,
   updateBlogBackgroundColor,
-  updateBlogFileName,
+  updateFileName,
   updateBlogImage,
 } from "../controllers/blog.controller";
 import { verifyJWT } from "../middlewares/auth.middleware";
@@ -20,7 +20,7 @@ router
   .get(getBlogById)
   .patch(verifyJWT, updateBlog)
   .delete(verifyJWT, deleteBlog);
-router.route("/file_name/:blogId").patch(verifyJWT, updateBlogFileName);
+router.route("/file_name/:blogId").patch(verifyJWT, updateFileName);
 router.route("/image/:blogId").patch(verifyJWT, updateBlogImage);
 router.route("/aspect_ratio/:blogId").patch(verifyJWT, updateBlogAspectRatio);
 router

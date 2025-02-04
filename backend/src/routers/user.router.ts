@@ -3,7 +3,7 @@ import {
   accessRefreshToken,
   accountDetailUpdate,
   assignRole,
-  avatarUpdate,
+  // avatarUpdate,
   changePassword,
   forgotPasswordRequest,
   getCurrentUser,
@@ -30,7 +30,7 @@ router.route("/reset_password/:resetToken").post(resetPassword);
 router.route("/signout").post(verifyJWT, userSignOut);
 router.route("/current_user").get(verifyJWT, getCurrentUser);
 router.route("/account_update").patch(verifyJWT, accountDetailUpdate);
-router.route("/avatar").patch(verifyJWT, upload.single("avatar"), avatarUpdate);
+// router.route("/avatar").patch(verifyJWT, upload.single("avatar"), avatarUpdate);
 router
   .route("/assign_role/:userId")
   .patch(verifyJWT, verifyPermission([userRoleEnum.ADMIN]), assignRole);

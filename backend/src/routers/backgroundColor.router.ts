@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   createBackgroundColor,
   deleteBackgroundColor,
-  getAllBackgroundColor,
+  getAllBackgroundColors,
   getBackgroundColorById,
   updateBackgroundColor,
 } from "../controllers/backgroundColor.controller";
@@ -13,14 +13,14 @@ const router = Router();
 
 router
   .route("/")
-  .get(getAllBackgroundColor)
+  .get(getAllBackgroundColors)
   .post(
     verifyJWT,
     verifyPermission([userRoleEnum.ADMIN]),
     createBackgroundColor
   );
 router
-  .route("/:background_colorId")
+  .route("/:backgroundColorId")
   .get(getBackgroundColorById)
   .delete(
     verifyJWT,
