@@ -19,12 +19,9 @@ const codeSchema: Schema<ICode> = new Schema(
     },
     code: {
       type: String,
-      default:
-        "export default function chai(name) {for (let i = 0; i < 10; i++) { console.log(`I love ${name} chai`) }}; chai(milk)",
     },
     language: {
       type: String,
-      default: "javaScript",
     },
     owner: {
       type: Schema.Types.ObjectId,
