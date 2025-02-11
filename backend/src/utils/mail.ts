@@ -2,10 +2,10 @@ import nodemailer from "nodemailer";
 import Mailgen from "mailgen";
 import { IOptions } from "../type";
 
-const sendEmail = async (options: IOptions) => {
+const sendEmail = async (options: IOptions): Promise<void> => {
   // Configure mailgen by setting a theme and your product info
   const mailGenerator = new Mailgen({
-    theme: "salted",
+    theme: "default",
     product: {
       // Appears in header & footer of e-mails
       name: "Wipe",
@@ -23,8 +23,7 @@ const sendEmail = async (options: IOptions) => {
 
   const transporter = nodemailer.createTransport({
     host: process.env.NODEMAILER_HOST,
-    port: process.env.NODEMAILER_PORT,
-    secure: false,
+    port: +process.env.NODEMAILER_PORT!,
     auth: {
       user: process.env.NODEMAILER_USER,
       pass: process.env.NODEMAILER_PASS,
