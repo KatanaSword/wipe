@@ -4,7 +4,7 @@ WORKDIR /wipe/backend
 
 COPY . .
 
-EXPOSE 8000
+EXPOSE 8080
 
 RUN npm install
 
