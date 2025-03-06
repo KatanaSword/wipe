@@ -1,6 +1,6 @@
 import { SVGProps } from "@/type";
 
-export const SignupSVG: React.FC<SVGProps> = ({
+export const PlaySVG: React.FC<SVGProps> = ({
   fillColor = "#00000",
   height = "30px",
   width = "30px",
@@ -17,7 +17,7 @@ export const SignupSVG: React.FC<SVGProps> = ({
       className={className}
       {...restProps}
     >
-      <path d="M399 384.2C376.9 345.8 335.4 320 288 320l-64 0c-47.4 0-88.9 25.8-111 64.2c35.2 39.2 86.2 63.8 143 63.8s107.8-24.7 143-63.8zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256 16a72 72 0 1 0 0-144 72 72 0 1 0 0 144z" />
+      <path d="M0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zM188.3 147.1c-7.6 4.2-12.3 12.3-12.3 20.9l0 176c0 8.7 4.7 16.7 12.3 20.9s16.8 4.1 24.3-.5l144-88c7.1-4.4 11.5-12.1 11.5-20.5s-4.4-16.1-11.5-20.5l-144-88c-7.4-4.5-16.7-4.7-24.3-.5z" />
     </svg>
   );
 };
