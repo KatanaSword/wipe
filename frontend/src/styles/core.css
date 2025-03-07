@@ -1,0 +1,33 @@
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+::-moz-selection {
+  /* Code for Firefox */
+  color: #ffff;
+  background: #8643f9;
+}
+
+::selection {
+  color: #ffff;
+  background: #8643f9;
+}
+
+html::-webkit-scrollbar {
+  width: 14px;
+}
+
+html::-webkit-scrollbar-track {
+  border-radius: 8px;
+  background-color: #e7e7e7;
+  border: 1px solid #cacaca;
+}
+
+html::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+  background-color: #8643f9;
+}
