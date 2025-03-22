@@ -77,6 +77,8 @@ export type ThemeProviderState = {
   setTheme: (theme: Theme) => void;
 };
 
+// Auth Slice Type
+
 export type InitialState = {
   status: boolean;
   userData: null;
@@ -84,7 +86,7 @@ export type InitialState = {
 
 // ENV Config Type
 
-export type Conf = {
+export type Config = {
   backendUserUrl: string;
   backendBackgroundColorUrl: string;
   backendAspectRatioUrl: string;
@@ -158,12 +160,13 @@ export interface UpdateBackgroundColor {
   colorTwoHexCode?: string;
 }
 
-// Blog Type
+// Blog post Type
 
 export interface CreateBlogPost {
   fileName: string;
   title: string;
   summary: string;
+  image: string;
   aspectRatioName: string;
   backgroundColorName: string;
 }
@@ -171,6 +174,11 @@ export interface CreateBlogPost {
 export interface UpdateBlogPost {
   title?: string;
   summary?: string;
+}
+
+export interface UpdateBlogPostImage {
+  image?: string;
+  blogId: string;
 }
 
 export interface BlogPostFileName {
@@ -186,4 +194,102 @@ export interface BlogPostAspectRatio {
 export interface BlogPostBackgroundColor {
   backgroundColorName?: string;
   blogId: string;
+}
+
+// Code post Type
+
+export interface CreateCodePost {
+  fileName: string;
+  code: string;
+  language: string;
+  codeFileName?: string;
+  aspectRatioName: string;
+  backgroundColorName: string;
+}
+
+export interface UpdateCodePost {
+  code?: string;
+  language?: string;
+  codeFileName?: string;
+}
+
+export interface CodePostFileName {
+  fileName?: string;
+  codeId: string;
+}
+
+export interface CodePostAspectRatio {
+  aspectRatioName?: string;
+  codeId: string;
+}
+
+export interface CodePostBackgroundColor {
+  backgroundColorName?: string;
+  codeId: string;
+}
+
+// Screenshot post Type
+
+export interface CreateScreenshotPost {
+  image: string;
+  fileName: string;
+  aspectRatioName: string;
+  backgroundColorName: string;
+}
+
+export interface UpdateScreenshotPostImage {
+  image?: string;
+  screenshotId: string;
+}
+
+export interface ScreenshotPostFileName {
+  fileName?: string;
+  screenshotId: string;
+}
+
+export interface ScreenshotPostAspectRatio {
+  aspectRatioName?: string;
+  screenshotId: string;
+}
+
+export interface ScreenshotPostBackgroundColor {
+  backgroundColorName?: string;
+  screenshotId: string;
+}
+
+// Testimonial post Type
+
+export interface CreateTestimonialPost {
+  fileName: string;
+  fullName: string;
+  occupation: string;
+  review: string;
+  aspectRatioName: string;
+  backgroundColorName: string;
+}
+
+export interface UpdateTestimonialPost {
+  fullName?: string;
+  occupation?: string;
+  review?: string;
+}
+
+export interface UpdateTestimonialPostAvatar {
+  avatar?: string;
+  testimonialId: string;
+}
+
+export interface TestimonialPostFileName {
+  fileName?: string;
+  testimonialId: string;
+}
+
+export interface TestimonialPostAspectRatio {
+  aspectRatioName?: string;
+  testimonialId: string;
+}
+
+export interface TestimonialPostBackgroundColor {
+  backgroundColorName?: string;
+  testimonialId: string;
 }
