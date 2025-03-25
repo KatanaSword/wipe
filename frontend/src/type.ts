@@ -77,11 +77,21 @@ export type ThemeProviderState = {
   setTheme: (theme: Theme) => void;
 };
 
-// Auth Slice Type
+// Store Slice Type
 
-export type InitialState = {
+export type AuthInitialState = {
   status: boolean;
-  userData: null;
+  userData: [] | null;
+  userToken: string | null;
+  error: string | null;
+  success: boolean;
+};
+
+export type AspectRatioInitialState = {
+  status: boolean;
+  aspectRatioData: [] | null;
+  error: string | null;
+  success: boolean;
 };
 
 // ENV Config Type
@@ -292,4 +302,13 @@ export interface TestimonialPostAspectRatio {
 export interface TestimonialPostBackgroundColor {
   backgroundColorName?: string;
   testimonialId: string;
+}
+
+// Register Form Type
+
+export interface RegisterFormInput {
+  username: string;
+  email: string;
+  password: string;
+  correctPassword: string;
 }
